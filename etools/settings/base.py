@@ -27,7 +27,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'records',
 )
 
 PROJECT_APPS = ()
@@ -66,11 +67,11 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
-LANGUAGE_CODE = 'en-gb'
+LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'UTC'  # 'Europe/London'
+TIME_ZONE = 'Asia/Omsk'
 
-USE_I18N = False
+USE_I18N = True
 
 USE_L10N = True
 
