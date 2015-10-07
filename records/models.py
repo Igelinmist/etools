@@ -3,7 +3,7 @@ from django.db import models
 
 class ProductionUnit(models.Model):
     """
-    Класс производственных единиц от Предприятия до Детали Оборудования
+    Модель производственных единиц от Предприятия до Детали Оборудования
     """
     plant = models.ForeignKey('self', blank=True, null=True,
                               related_name='parts', on_delete=models.CASCADE)
@@ -23,7 +23,7 @@ class ProductionUnit(models.Model):
 
     def unit_tree(self):
         """
-        Метод строит дерево подчиненных объектов
+        Метод строит дерево (список) подчиненных объектов, сохраняя отступы
         """
         def get_knot_dict(input_set):
             res = {}
@@ -49,3 +49,60 @@ class ProductionUnit(models.Model):
         knot_dict = get_knot_dict(units)
         get_tree(knot_dict, tree, 0, self)
         return tree
+
+
+class Journal(models.Model):
+    """
+    Модель Журнала записей статистики работы/простоя по конкретному
+    оборудованию
+    """
+
+    equipment = models.OneToOneField(ProductionUnit, on_delete=models.CASCADE,
+                                     related_name='journal')
+    hot_rzv_stat = models.BooleanField(default=False)
+    downtime_stat = models.BooleanField(default=False)
+    stat_by_parent = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['equipment__name']
+        verbose_name = 'журнал'
+        verbose_name_plural = 'журналы'
+        default_permissions = []
+        permissions = (
+            ('view_journal_details', 'Может просматривать записи журнала'),
+            ('view_journal_list', 'Может посмотреть список журналов'),
+            ('create_journal_record', 'Может создать запись в журнале'),
+            ('edit_journal_record', 'Может редактировать запись в журнале'),
+            ('delete_journal_record', 'Может удалить запись в журнале'),
+            ('create_journal_event', 'Может создать событие в журнале'),
+            ('delete_journal_event', 'Может удалить событие в журнале'),
+        )
+
+    def __str__(self):
+        plant_name = self.equipment.plant.name if self.equipment.plant else '-'
+        return plant_name + ' \ ' + self.equipment.name
+
+
+class Record(models.Model):
+    """
+    Модель Одна строка стандартной записи журнала на дату начала периода
+    """
+
+    journal = models.ForeignKey('Journal', on_delete=models.CASCADE,
+                                related_name='records')
+    date = models.DateField()
+    work = models.DurationField(default='0:00')
+    pusk_cnt = models.IntegerField(default=0)
+    ostanov_cnt = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('journal', 'date')
+        default_permissions = []
+        verbose_name = 'запись'
+        verbose_name_plural = 'записи'
+
+    def __str__(self):
+        return "{0} work time: {1}".format(
+            self.date,
+            self.work)
