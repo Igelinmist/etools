@@ -1,5 +1,8 @@
 from django.db import models
 
+from .constans import EVENT_CHOICES, STATE_CHOICES
+# from .constans import EXT_STATE_DATA, STANDARD_STATE_DATA, EVENT_CHOICES_DICT
+
 
 class ProductionUnit(models.Model):
     """
@@ -23,7 +26,8 @@ class ProductionUnit(models.Model):
 
     def unit_tree(self):
         """
-        Метод строит дерево (список) подчиненных объектов, сохраняя отступы
+        Метод строит дерево (список) подчиненных объектов, включая отступ
+        глубины.
         """
         def get_knot_dict(input_set):
             res = {}
@@ -103,6 +107,44 @@ class Record(models.Model):
         verbose_name_plural = 'записи'
 
     def __str__(self):
-        return "{0} work time: {1}".format(
+        return "{0} | wt: {1} | pc: {2} | oc: {3}".format(
             self.date,
-            self.work)
+            self.work,
+            self.pusk_cnt,
+            self.ostanov_cnt)
+
+
+class ExtStateItem(models.Model):
+    """
+    Модель расширения стандартной записи статистики дополнительным,
+    ненулевым, временем нахождения в определенном типе простоя
+    """
+
+    record = models.ForeignKey('Record',
+                               related_name='ext_states',
+                               on_delete=models.CASCADE)
+    state_code = models.CharField(max_length=3,
+                                  choices=STATE_CHOICES,
+                                  default='rsv',
+                                  db_index=True)
+    time_in_state = models.DurationField()
+
+    class Meta:
+        default_permissions = []
+
+
+class EventItem(models.Model):
+    """
+    Модель Отражение события жизненного цикла
+    из предопределенного набора: [Ввод, Списание, Замена]
+    """
+
+    journal = models.ForeignKey('Journal',
+                                related_name='events',
+                                on_delete=models.CASCADE)
+    date = models.DateField()
+    event_code = models.CharField(max_length=3,
+                                  choices=EVENT_CHOICES)
+
+    class Meta:
+        default_permissions = []

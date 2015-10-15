@@ -28,10 +28,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'records',
+    'debug_toolbar',
 )
 
-PROJECT_APPS = ()
+PROJECT_APPS = ('records',)
 
 INSTALLED_APPS += PROJECT_APPS
 
