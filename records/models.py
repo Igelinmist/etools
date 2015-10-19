@@ -27,7 +27,7 @@ class ProductionUnit(models.Model):
     def unit_tree(self):
         """
         Метод строит дерево (список) подчиненных объектов, включая отступ
-        глубины.
+        глубины вложенности.
         """
         def get_knot_dict(input_set):
             res = {}
@@ -86,6 +86,8 @@ class Journal(models.Model):
     def __str__(self):
         plant_name = self.equipment.plant.name if self.equipment.plant else '-'
         return plant_name + ' \ ' + self.equipment.name
+
+    def createRecord(self, rdate, **rdata):
 
 
 class Record(models.Model):
