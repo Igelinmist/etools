@@ -31,7 +31,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
 )
 
-PROJECT_APPS = ('records',)
+PROJECT_APPS = ('uptime',)
 
 INSTALLED_APPS += PROJECT_APPS
 
