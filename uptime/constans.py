@@ -20,6 +20,6 @@ EVENT_CHOICES = (
 )
 EVENT_CHOICES_DICT = dict(EVENT_CHOICES)
 
-STANDARD_STATE_DATA = ('date', 'work', 'ostanov_cnt', 'pusk_cnt')
+RECORD_SET = {'date', 'work', 'down_cnt', 'up_cnt'}
 
-EXT_STATE_DATA = ('rsv', 'arm', 'trm', 'krm', 'srm', 'rcd')
+INTERVAL_SET = {'wrk', 'hrs', 'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}

@@ -1,7 +1,7 @@
 from django.db import models
 
 from .constans import EVENT_CHOICES, STATE_CHOICES
-# from .constans import EXT_STATE_DATA, STANDARD_STATE_DATA, EVENT_CHOICES_DICT
+from .constans import RECORD_SET, INTERVAL_SET
 
 
 class Equipment(models.Model):
@@ -97,8 +97,12 @@ class Journal(models.Model):
         plant_name = self.equipment.plant.name if self.equipment.plant else '-'
         return plant_name + ' \ ' + self.equipment.name
 
-    def create_record(self, rdate, **rdata):
-        pass
+    def write_record(self, rdate, **rdata):
+        rec_keys = rdata.keys() & RECORD_SET
+        interval_keys = rdata.keys() & INTERVAL_SET
+        rec_argv = {key: rdata[key] for key in rec_keys}
+        intervals_argv = {key: rdata[key] for key in interval_keys}
+        self.records.create(rdate=rdate, **rec_argv)
 
 
 class Record(models.Model):
