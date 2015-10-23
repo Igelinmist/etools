@@ -2,6 +2,7 @@ from django.db import models
 
 from .constans import EVENT_CHOICES, STATE_CHOICES
 from .constans import RECORD_SET, INTERVAL_SET
+from .utils import req_date
 
 
 class Equipment(models.Model):
@@ -102,7 +103,7 @@ class Journal(models.Model):
         interval_keys = rdata.keys() & INTERVAL_SET
         rec_argv = {key: rdata[key] for key in rec_keys}
         intervals_argv = {key: rdata[key] for key in interval_keys}
-        self.records.create(rdate=rdate, **rec_argv)
+        self.records.create(rdate=req_date(rdate), **rec_argv)
 
 
 class Record(models.Model):

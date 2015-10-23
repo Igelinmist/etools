@@ -54,6 +54,7 @@ venv
 *.ipr
 *.iml
 *.iws
+.idea
 
 etools/settings/local.py
 etools/settings/production.py
