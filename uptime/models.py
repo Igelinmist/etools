@@ -1,5 +1,7 @@
 from django.db import models
 
+from datetime import timedelta
+
 from .constans import EVENT_CHOICES, STATE_CHOICES
 from .constans import RECORD_SET, INTERVAL_SET
 from .utils import req_date
@@ -103,7 +105,8 @@ class Journal(models.Model):
         interval_keys = rdata.keys() & INTERVAL_SET
         rec_argv = {key: rdata[key] for key in rec_keys}
         intervals_argv = {key: rdata[key] for key in interval_keys}
-        self.records.create(rdate=req_date(rdate), **rec_argv)
+        rec = self.records.create(rdate=req_date(rdate), **rec_argv)
+        rec.set_intervals(intervals_argv)
 
 
 class Record(models.Model):
@@ -120,6 +123,75 @@ class Record(models.Model):
         db_table = 'records'
         unique_together = ('journal', 'rdate')
 
+    @property
+    def wrk(self):
+        try:
+            interval = self.intervals.filter(state_code='wrk')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def hrs(self):
+        try:
+            interval = self.intervals.filter(state_code='hrs')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def rsv(self):
+        try:
+            interval = self.intervals.filter(state_code='rsv')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def trm(self):
+        try:
+            interval = self.intervals.filter(state_code='trm')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def arm(self):
+        try:
+            interval = self.intervals.filter(state_code='arm')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def krm(self):
+        try:
+            interval = self.intervals.filter(state_code='krm')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def srm(self):
+        try:
+            interval = self.intervals.filter(state_code='srm')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    @property
+    def rcd(self):
+        try:
+            interval = self.intervals.filter(state_code='rcd')[0]
+            return interval.stat_time
+        except IndexError:
+            return '0:00'
+
+    def set_intervals(self, kwarg):
+        for interval in kwarg:
+            self.intervals.create(state_code=interval,
+                                  time_in_state=kwarg[interval])
+
 
 class IntervalItem(models.Model):
 
@@ -135,6 +207,13 @@ class IntervalItem(models.Model):
     class Meta:
         db_table = 'intervals'
         default_permissions = []
+
+    @property
+    def stat_time(self):
+        sec = self.time_in_state.total_seconds()
+        hours, remainder = divmod(sec, 3600)
+        minutes, sec = divmod(remainder, 60)
+        return '%d:%02d' % (int(hours), int(minutes))
 
 
 class EventItem(models.Model):

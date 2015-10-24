@@ -13,6 +13,6 @@ class JournalTestCase(TestCase):
         journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
         rec = journal.records.filter(rdate='2015-01-01').all()[0]
 
-        self.assertEquals(rec.rdate, '01.01.2015')
+        self.assertEquals(rec.rdate.strftime('%d.%m.%Y'), '01.01.2015')
         self.assertEquals(rec.wrk, '15:00')
         self.assertEquals(rec.arm, '9:00')
