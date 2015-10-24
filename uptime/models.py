@@ -101,12 +101,28 @@ class Journal(models.Model):
         return plant_name + ' \ ' + self.equipment.name
 
     def write_record(self, rdate, **rdata):
+        # Разделяем словарь входных данных на то, что относится к записи
+        # и то, что к интревалам
         rec_keys = rdata.keys() & RECORD_SET
         interval_keys = rdata.keys() & INTERVAL_SET
         rec_argv = {key: rdata[key] for key in rec_keys}
         intervals_argv = {key: rdata[key] for key in interval_keys}
-        rec = self.records.create(rdate=req_date(rdate), **rec_argv)
-        rec.set_intervals(intervals_argv)
+        # Пробуем найти запись на эту дату
+        try:
+            rec = self.records.filter(rdate=req_date(rdate))[0]
+            # Проверяем изменение данных записи
+            changed_fields = []
+            for name in rec_keys:
+                if rec.__getattribute__(name) != rec_argv[name]:
+                    changed_fields.append(name)
+                    rec.__setattr__(name, rec_argv[name])
+            rec.save(update_fields=changed_fields)
+            # Изменяем (удаляем -> создаем) интервалы
+            rec.intervals.all().delete()
+            rec.set_intervals(intervals_argv)
+        except IndexError:
+            rec = self.records.create(rdate=req_date(rdate), **rec_argv)
+            rec.set_intervals(intervals_argv)
 
 
 class Record(models.Model):
@@ -187,10 +203,10 @@ class Record(models.Model):
         except IndexError:
             return '0:00'
 
-    def set_intervals(self, kwarg):
-        for interval in kwarg:
+    def set_intervals(self, i_dict):
+        for interval in i_dict:
             self.intervals.create(state_code=interval,
-                                  time_in_state=kwarg[interval])
+                                  time_in_state=i_dict[interval])
 
 
 class IntervalItem(models.Model):

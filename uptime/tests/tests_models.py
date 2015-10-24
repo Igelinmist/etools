@@ -16,3 +16,20 @@ class JournalTestCase(TestCase):
         self.assertEquals(rec.rdate.strftime('%d.%m.%Y'), '01.01.2015')
         self.assertEquals(rec.wrk, '15:00')
         self.assertEquals(rec.arm, '9:00')
+        self.assertEquals(rec.trm, '0:00')
+
+    def test_journal_can_change_record(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+        journal.write_record('01.01.2015', wrk='14:00', arm='10:00', down_cnt=2, up_cnt=1)
+        rset = journal.records.filter(rdate='2015-01-01')
+        cnt = rset.count()
+        rec = rset.all()[0]
+
+        self.assertEquals(cnt, 1)
+        self.assertEquals(rec.rdate.strftime('%d.%m.%Y'), '01.01.2015')
+        self.assertEquals(rec.wrk, '14:00')
+        self.assertEquals(rec.arm, '10:00')
+        self.assertEquals(rec.trm, '0:00')
+        self.assertEquals(rec.down_cnt, 2)
+        self.assertEquals(rec.up_cnt, 1)
