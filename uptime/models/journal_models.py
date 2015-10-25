@@ -1,8 +1,8 @@
 from django.db import models
 
-from .constans import EVENT_CHOICES, STATE_CHOICES
-from .constans import RECORD_SET, INTERVAL_SET
-from .utils import req_date
+from uptime.constans import EVENT_CHOICES, STATE_CHOICES
+from uptime.constans import RECORD_SET, INTERVAL_SET
+from uptime.utils import req_date
 
 
 class Equipment(models.Model):
@@ -127,6 +127,11 @@ class Journal(models.Model):
         return rec
 
 
+class RecordManager(models.Manager):
+    def get_queryset(self):
+        return super(RecordManager, self).get_queryset().prefetch_related('intervals')
+
+
 class Record(models.Model):
 
     journal = models.ForeignKey('Journal', on_delete=models.CASCADE,
@@ -136,6 +141,9 @@ class Record(models.Model):
     down_cnt = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    records = RecordManager()
+    objects = RecordManager()
 
     class Meta:
         db_table = 'records'

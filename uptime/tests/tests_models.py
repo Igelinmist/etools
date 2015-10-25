@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from uptime.models import Equipment, Journal, Record, IntervalItem
+from uptime.models.journal_models import Equipment, Journal
 
 
 class JournalTestCase(TestCase):
@@ -21,8 +21,9 @@ class JournalTestCase(TestCase):
     def test_journal_can_change_record(self):
         journal = Journal.objects.all()[0]
         journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
-        journal.write_record('01.01.2015', wrk='14:00', arm='10:00', down_cnt=2, up_cnt=1)
-        rset = journal.records.prefetch_related('intervals').filter(rdate='2015-01-01')
+        journal.write_record('01.01.2015', wrk='14:00',
+                             arm='10:00', down_cnt=2, up_cnt=1)
+        rset = journal.records.filter(rdate='2015-01-01')
         cnt = rset.count()
         rec = rset.all()[0]
 
