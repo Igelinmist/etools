@@ -1,7 +1,5 @@
 from django.db import models
 
-from datetime import timedelta
-
 from .constans import EVENT_CHOICES, STATE_CHOICES
 from .constans import RECORD_SET, INTERVAL_SET
 from .utils import req_date
@@ -57,7 +55,10 @@ class Equipment(models.Model):
                 if eq.id in knot_dict:
                     get_tree(knot_dict, tree, ident, eq)
                 else:
-                    tree.append((dict(id=eq.id, name=eq.name, journal_id=eq.journal_id), ident))
+                    tree.append((dict(id=eq.id,
+                                      name=eq.name,
+                                      journal_id=eq.journal_id),
+                                ident))
 
         units = Equipment.objects.all()
         tree = []
@@ -123,6 +124,7 @@ class Journal(models.Model):
         except IndexError:
             rec = self.records.create(rdate=req_date(rdate), **rec_argv)
             rec.set_intervals(intervals_argv)
+        return rec
 
 
 class Record(models.Model):
@@ -139,69 +141,44 @@ class Record(models.Model):
         db_table = 'records'
         unique_together = ('journal', 'rdate')
 
+    def _in_state(self, state_name):
+        q_set = self.intervals.filter(state_code=state_name)
+        if q_set.exists():
+            return q_set[0].stat_time
+        else:
+            return '0:00'
+
     @property
     def wrk(self):
-        try:
-            interval = self.intervals.filter(state_code='wrk')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('wrk')
 
     @property
     def hrs(self):
-        try:
-            interval = self.intervals.filter(state_code='hrs')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('hrs')
 
     @property
     def rsv(self):
-        try:
-            interval = self.intervals.filter(state_code='rsv')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('rsv')
 
     @property
     def trm(self):
-        try:
-            interval = self.intervals.filter(state_code='trm')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('trm')
 
     @property
     def arm(self):
-        try:
-            interval = self.intervals.filter(state_code='arm')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('arm')
 
     @property
     def krm(self):
-        try:
-            interval = self.intervals.filter(state_code='krm')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('krm')
 
     @property
     def srm(self):
-        try:
-            interval = self.intervals.filter(state_code='srm')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('srm')
 
     @property
     def rcd(self):
-        try:
-            interval = self.intervals.filter(state_code='rcd')[0]
-            return interval.stat_time
-        except IndexError:
-            return '0:00'
+        return self._in_state('rcd')
 
     def set_intervals(self, i_dict):
         for interval in i_dict:

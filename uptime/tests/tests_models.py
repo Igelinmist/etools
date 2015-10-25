@@ -22,7 +22,7 @@ class JournalTestCase(TestCase):
         journal = Journal.objects.all()[0]
         journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
         journal.write_record('01.01.2015', wrk='14:00', arm='10:00', down_cnt=2, up_cnt=1)
-        rset = journal.records.filter(rdate='2015-01-01')
+        rset = journal.records.prefetch_related('intervals').filter(rdate='2015-01-01')
         cnt = rset.count()
         rec = rset.all()[0]
 
