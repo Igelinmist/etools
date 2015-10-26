@@ -2,7 +2,7 @@ from django.db import models
 
 from uptime.constans import EVENT_CHOICES, STATE_CHOICES
 from uptime.constans import RECORD_SET, INTERVAL_SET
-from uptime.utils import req_date
+from uptime.utils import req_date, req_timedelta
 
 
 class Equipment(models.Model):
@@ -191,7 +191,7 @@ class Record(models.Model):
     def set_intervals(self, i_dict):
         for interval in i_dict:
             self.intervals.create(state_code=interval,
-                                  time_in_state=i_dict[interval])
+                                  time_in_state=req_timedelta(i_dict[interval]))
 
 
 class IntervalItem(models.Model):
