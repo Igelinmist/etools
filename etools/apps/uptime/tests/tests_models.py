@@ -1,9 +1,11 @@
 from django.test import TestCase
+from datetime import date, timedelta
 
 from uptime.models.journal_models import Equipment, Journal
 
 
 class JournalTestCase(TestCase):
+
     def setUp(self):
         eq = Equipment.objects.create(name='Test equipment')
         Journal.objects.create(equipment=eq, downtime_stat=True)
@@ -34,3 +36,28 @@ class JournalTestCase(TestCase):
         self.assertEquals(rec.trm, '0:00')
         self.assertEquals(rec.down_cnt, 2)
         self.assertEquals(rec.up_cnt, 1)
+
+    def test_journal_get_last_record_list(self):
+        journal = Journal.objects.all()[0]
+        for offset in range(5):
+            dt = (date(2015, 1, 1) + timedelta(days=offset)).strftime("%d.%m.%Y")
+            journal.write_record(dt, wrk='24:00')
+        date_list = [rec.rdate for rec in journal.get_last_records(depth=3)]
+
+        self.assertEquals(date_list, [date(2015, 1, 5),
+                                      date(2015, 1, 4),
+                                      date(2015, 1, 3), ])
+
+    def test_journal_get_last_record_list_for_child(self):
+        journal = Journal.objects.all()[0]
+        child_equipment = journal.equipment.parts.create()
+        child_journal = Journal(equipment=child_equipment, stat_by_parent=True)
+        child_journal.save()
+        for offset in range(5):
+            dt = (date(2015, 1, 1) + timedelta(days=offset)).strftime("%d.%m.%Y")
+            journal.write_record(dt, wrk='24:00')
+        date_list_child = [rec.rdate for rec in child_journal.get_last_records(depth=3)]
+
+        self.assertEquals(date_list_child, [date(2015, 1, 5),
+                                            date(2015, 1, 4),
+                                            date(2015, 1, 3), ])

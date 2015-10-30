@@ -126,8 +126,15 @@ class Journal(models.Model):
             rec.set_intervals(intervals_argv)
         return rec
 
+    def get_last_records(self, depth=10):
+        if self.stat_by_parent:
+            return self.equipment.plant.journal.get_last_records(depth)
+        else:
+            return self.records.prefetch_related().order_by('-rdate')[:depth]
+
 
 class RecordManager(models.Manager):
+
     def get_queryset(self):
         return super(RecordManager, self).get_queryset().prefetch_related('intervals')
 
