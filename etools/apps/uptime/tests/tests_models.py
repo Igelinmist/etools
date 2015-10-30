@@ -53,6 +53,7 @@ class JournalTestCase(TestCase):
         child_equipment = journal.equipment.parts.create()
         child_journal = Journal(equipment=child_equipment, stat_by_parent=True)
         child_journal.save()
+        # Добавляем записей для журнала родительского оборудования
         for offset in range(5):
             dt = (date(2015, 1, 1) + timedelta(days=offset)).strftime("%d.%m.%Y")
             journal.write_record(dt, wrk='24:00')

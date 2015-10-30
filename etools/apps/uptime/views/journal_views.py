@@ -13,4 +13,9 @@ def show(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     record_list = journal.get_last_records(depth=5)
     event_list = journal.events.order_by('-date')[:3]
-    return render(request, 'uptime/show.html')
+    context = {
+        'journal': journal,
+        'record_list': record_list,
+        'event_list': event_list,
+    }
+    return render(request, 'uptime/show.html', context)
