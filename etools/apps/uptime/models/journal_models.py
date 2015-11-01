@@ -58,9 +58,9 @@ class Equipment(models.Model):
                     tree.append((dict(id=eq.id,
                                       name=eq.name,
                                       journal_id=eq.journal_id),
-                                ident))
+                                 ident))
 
-        units = Equipment.objects.all()
+        units = Equipment.objects.select_related().all()
         tree = []
         knot_dict = get_knot_dict(units)
         get_tree(knot_dict, tree, 0, self)
