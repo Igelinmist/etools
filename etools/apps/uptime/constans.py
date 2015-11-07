@@ -20,6 +20,8 @@ EVENT_CHOICES = (
 )
 EVENT_CHOICES_DICT = dict(EVENT_CHOICES)
 
-RECORD_SET = {'rdate', 'work', 'down_cnt', 'up_cnt'}
+RECORD_SET = {'rdate', 'down_cnt', 'up_cnt'}
 
 INTERVAL_SET = {'wrk', 'hrs', 'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}
+
+EXT_INTERVAL_SET = {'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}

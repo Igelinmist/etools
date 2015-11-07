@@ -31,7 +31,10 @@ INSTALLED_APPS = (
     'debug_toolbar',
 )
 
-PROJECT_APPS = ('uptime',)
+PROJECT_APPS = (
+    'bootstrap3_datetime',
+    'uptime',
+)
 
 INSTALLED_APPS += PROJECT_APPS
 

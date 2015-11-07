@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from uptime.views import journal_views
+from .views import journal_views
 
 urlpatterns = [
     url(r'^$',
