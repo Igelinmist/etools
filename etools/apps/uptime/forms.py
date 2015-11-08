@@ -1,9 +1,9 @@
-from bootstrap3_datetime.widget import DateTimePicker
+from bootstrap3_datetime.widgets import DateTimePicker
 
 from django import forms
-from datetime import timedelta
 
 from .constants import INTERVAL_SET, EXT_INTERVAL_SET
+
 
 class RecordForm(forms.Form):
     rdate = forms.DateField(

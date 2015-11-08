@@ -62,3 +62,19 @@ class JournalTestCase(TestCase):
         self.assertEquals(date_list_child, [date(2015, 1, 5),
                                             date(2015, 1, 4),
                                             date(2015, 1, 3), ])
+
+    def test_journal_switch_record_on_exist_record(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+        rec, rdate = journal.switch_rec('02.01.2015', '-1')
+
+        self.assertEquals(rdate, '01.01.2015')
+        self.assertEquals(rec.wrk, '15:00')
+
+    def test_journal_switch_record_on_nonexist_record(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+        rec, rdate = journal.switch_rec('02.01.2015', '+1')
+
+        self.assertEquals(rdate, '03.01.2015')
+        self.assertEquals(rec, None)

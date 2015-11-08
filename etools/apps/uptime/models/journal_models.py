@@ -1,8 +1,10 @@
+from datetime import timedelta, datetime
+
 from django.db import models
 
-from uptime.constans import EVENT_CHOICES, STATE_CHOICES
-from uptime.constans import RECORD_SET, INTERVAL_SET
-from uptime.utils import req_date, req_timedelta
+from ..constants import EVENT_CHOICES, STATE_CHOICES
+from ..constants import RECORD_SET, INTERVAL_SET
+from ..utils import req_date, req_timedelta
 
 
 class Equipment(models.Model):
@@ -131,6 +133,15 @@ class Journal(models.Model):
             return self.equipment.plant.journal.get_last_records(depth)
         else:
             return self.records.prefetch_related().order_by('-rdate')[:depth]
+
+    def switch_rec(self, curent_date_local, offset_str):
+        cur_date = datetime.strptime(curent_date_local, '%d.%m.%Y')
+        new_date = cur_date + timedelta(int(offset_str))
+        rset = self.records.filter(rdate=new_date.strftime("%Y-%m-%d"))
+        if rset.exists():
+            return rset[0], new_date.strftime("%d.%m.%Y")
+        else:
+            return None, new_date.strftime("%d.%m.%Y")
 
 
 class RecordManager(models.Manager):
