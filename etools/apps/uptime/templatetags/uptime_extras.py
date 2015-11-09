@@ -1,6 +1,6 @@
 from django import template
 
-from ..constans import EVENT_CHOICES_DICT
+from ..constants import EVENT_CHOICES_DICT
 
 register = template.Library()
 

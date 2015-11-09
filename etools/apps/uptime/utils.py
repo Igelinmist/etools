@@ -1,9 +1,14 @@
-from datetime import timedelta
+from datetime import timedelta, date
 
 
 def req_date(local_date):
-    d, m, y = local_date.split('.')
-    return '{0}-{1}-{2}'.format(y, m, d)
+    if isinstance(local_date, str):
+        d, m, y = local_date.split('.')
+        return '{0}-{1}-{2}'.format(y, m, d)
+    elif isinstance(local_date, date):
+        return local_date.strftime('%Y-%m-%d')
+    else:
+        return local_date
 
 
 def req_timedelta(arg):

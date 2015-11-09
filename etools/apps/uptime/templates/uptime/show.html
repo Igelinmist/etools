@@ -22,8 +22,8 @@
             </tr>
             {% for rec in record_list %}
             <tr>
-                <td class="text-center">{{ rec.date }}</td>
-                <td class="text-center">{{ rec.work }}</td>
+                <td class="text-center">{{ rec.rdate }}</td>
+                <td class="text-center">{{ rec.wrk }}</td>
                 <td class="text-center">{{ rec.rsv }}</td>
                 <td class="text-center">{{ rec.trm }}</td>
                 <td class="text-center">{{ rec.arm }}</td>
@@ -51,8 +51,8 @@
                 <th></th>
             </tr>
             <tr>
-                <td class="text-center">{{ rec.date }}</td>
-                <td class="text-center">{{ rec.work }}</td>
+                <td class="text-center">{{ rec.rdate }}</td>
+                <td class="text-center">{{ rec.wrk }}</td>
             </tr>
         {% endif %}
     </table>

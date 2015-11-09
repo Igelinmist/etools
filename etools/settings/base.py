@@ -87,6 +87,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 MEDIA_ROOT = root('assets', 'uploads')
+
 MEDIA_URL = '/media/'
 
 # Additional locations of static files
@@ -99,6 +100,24 @@ TEMPLATE_DIRS = (
     root('templates'),
 )
 
+DATE_FORMAT = 'd.m.Y'
+
+TIME_FORMAT = 'H:i'
+
+SHORT_DATETIME_FORMAT = 'd.m.Y H:i'
+
+DATE_INPUT_FORMATS = ('%d.%m.%Y')
+
+TIME_INPUT_FORMATS = (
+    '%H:%M:%S',     # '14:30:59'
+    '%H:%M',        # '14:30'
+)
+
+DATETIME_INPUT_FORMATS = (
+    '%d.%m.%Y %H:%M:%S',
+    '%d.%m.%Y %H:%M',
+    '%d.%m.%Y',
+)
 
 # .local.py overrides all the common settings.
 try:

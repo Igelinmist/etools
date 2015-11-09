@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Новая запись журнала статистики работы для {{ journal.equipment.name }}</h2>
+    <form action="{% url 'uptime:record_new' journal.id%}" method="post" class="form-inline" role="form">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" value="-1" name="submit" class="btn btn-default col-md-4">&#9668; записать </button>
+    <button type="submit" value="af" name="submit" class="btn btn-default col-md-4">записать &#9660;</button>
+    <button type="submit" value="+1" name="submit" class="btn btn-default col-md-4">записать &#9658;</button><br />
+{% endblock content %}

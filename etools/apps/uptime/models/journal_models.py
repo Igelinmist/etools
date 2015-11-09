@@ -132,9 +132,9 @@ class Journal(models.Model):
         if self.stat_by_parent:
             return self.equipment.plant.journal.get_last_records(depth)
         else:
-            return self.records.prefetch_related().order_by('-rdate')[:depth]
+            return self.records.order_by('-rdate')[:depth]
 
-    def switch_rec(self, curent_date_local, offset_str):
+    def switch_date_get_rec(self, curent_date_local, offset_str):
         cur_date = datetime.strptime(curent_date_local, '%d.%m.%Y')
         new_date = cur_date + timedelta(int(offset_str))
         rset = self.records.filter(rdate=new_date.strftime("%Y-%m-%d"))
@@ -168,11 +168,18 @@ class Record(models.Model):
         unique_together = ('journal', 'rdate')
 
     def _in_state(self, state_name):
-        q_set = self.intervals.filter(state_code=state_name)
-        if q_set.exists():
-            return q_set[0].stat_time
-        else:
-            return '0:00'
+        try:
+            for interval in self._prefetched_objects_cache['intervals']:
+                if interval.stat_code == state_name:
+                    return interval.stat_time
+        except (AttributeError, KeyError):
+            print(self.__dict__)
+            q_set = self.intervals.filter(state_code=state_name)
+            if q_set.exists():
+                return q_set[0].stat_time
+            else:
+                return '0:00'
+        return '0:00'
 
     @property
     def wrk(self):
@@ -208,8 +215,10 @@ class Record(models.Model):
 
     def set_intervals(self, i_dict):
         for interval in i_dict:
-            self.intervals.create(state_code=interval,
-                                  time_in_state=req_timedelta(i_dict[interval]))
+            t_i_s = req_timedelta(i_dict[interval])
+            if t_i_s:
+                self.intervals.create(state_code=interval,
+                                      time_in_state=t_i_s)
 
 
 class IntervalItem(models.Model):
