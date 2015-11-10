@@ -7,6 +7,12 @@ from ..constants import RECORD_SET, INTERVAL_SET
 from ..utils import req_date, req_timedelta
 
 
+class EquipmentManager(models.Manager):
+
+    def get_queryset(self):
+        return super(EquipmentManager, self).get_queryset().select_related()
+
+
 class Equipment(models.Model):
 
     """
@@ -62,11 +68,17 @@ class Equipment(models.Model):
                                       journal_id=eq.journal_id),
                                  ident))
 
-        units = Equipment.objects.select_related().all()
+        units = Equipment.objects.all()
         tree = []
         knot_dict = get_knot_dict(units)
         get_tree(knot_dict, tree, 0, self)
         return tree
+
+
+class JournalManager(models.Manager):
+
+    def get_queryset(self):
+        return super(JournalManager, self).get_queryset().select_related()
 
 
 class Journal(models.Model):
@@ -82,6 +94,9 @@ class Journal(models.Model):
     hot_rzv_stat = models.BooleanField(default=False)
     downtime_stat = models.BooleanField(default=False)
     description = models.TextField(blank=True)
+
+    objects = JournalManager()
+    journal = JournalManager()
 
     class Meta:
         db_table = 'journals'
@@ -173,7 +188,6 @@ class Record(models.Model):
                 if interval.state_code == state_name:
                     return interval.stat_time
         except (AttributeError, KeyError):
-            print(self._prefetched_objects_cache['intervals'])
             q_set = self.intervals.filter(state_code=state_name)
             if q_set.exists():
                 return q_set[0].stat_time

@@ -1,6 +1,7 @@
 from bootstrap3_datetime.widgets import DateTimePicker
 
 from django import forms
+# import floppyforms as forms
 
 from .constants import INTERVAL_SET, EXT_INTERVAL_SET
 
@@ -14,14 +15,14 @@ class RecordForm(forms.Form):
         label='Дата:',
     )
     wrk = forms.CharField()
-    rsv = forms.CharField(required=False)
-    arm = forms.CharField(required=False)
-    trm = forms.CharField(required=False)
-    krm = forms.CharField(required=False)
-    srm = forms.CharField(required=False)
-    rcd = forms.CharField(required=False)
-    up_cnt = forms.IntegerField(initial=0, min_value=0)
-    down_cnt = forms.IntegerField(initial=0, min_value=0)
+    rsv = forms.CharField()
+    arm = forms.CharField()
+    trm = forms.CharField()
+    krm = forms.CharField()
+    srm = forms.CharField()
+    rcd = forms.CharField()
+    up_cnt = forms.IntegerField(initial=0, min_value=0, label="Включений")
+    down_cnt = forms.IntegerField(initial=0, min_value=0, label="Отключений")
 
     def __init__(self, *args, **kwargs):
         extended_stat = kwargs.pop('extended_stat', None)

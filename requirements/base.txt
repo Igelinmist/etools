@@ -43,3 +43,6 @@ django-bootstrap3-datetimepicker==2.2.3
 
 # Tweak the form field rendering in templates, not in python-level form definitions.
 django-widget-tweaks
+
+# JQuery library
+django-jquery
