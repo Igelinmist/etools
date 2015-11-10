@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Новая запись журнала статистики работы для {{ journal.equipment.name }}</h2>
+    <h2>Новая запись журнала статистики работы для <strong>{{ journal.equipment.name }}</strong></h2>
     <form action="{% url 'uptime:record_new' journal.id%}" method="post" class="form-inline" role="form">{% csrf_token %}
         <!-- Общая часть формы для создания и редактирования записи -->
         {% include "uptime/_record_form.html" %}

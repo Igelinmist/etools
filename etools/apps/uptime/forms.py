@@ -8,10 +8,7 @@ from .constants import INTERVAL_SET, EXT_INTERVAL_SET
 
 class RecordForm(forms.Form):
     rdate = forms.DateField(
-        widget=DateTimePicker(options={
-            "startDate": "01.01.1945",
-            "pickTime": False,
-        }),
+        widget=DateTimePicker(options={"startDate": "01.01.1945", "pickTime": False, }),
         label='Дата:',
     )
     wrk = forms.CharField()

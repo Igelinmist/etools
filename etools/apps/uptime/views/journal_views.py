@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
-from ..models.journal_models import Equipment, Journal
+from ..models.journal_models import Equipment, Journal, Record
 from ..forms import RecordForm
 
 
@@ -33,7 +33,7 @@ def record_new(request, journal_id):
         else:
             rec, rdate = journal.switch_date_get_rec(request.POST['rdate'], request.POST['submit'])
             if rec:
-                return redirect('uptime:record_edit', {'journal_id': journal_id, 'record_id': rec.id})
+                return redirect('uptime:record_edit', {'journal': journal, 'record_id': rec.id})
             else:
                 form = RecordForm(None, extended_stat=journal.downtime_stat, initial={'rdate': rdate})
                 return render(
@@ -44,4 +44,21 @@ def record_new(request, journal_id):
 
 
 def record_edit(request, journal_id, record_id):
-    pass
+    record = get_object_or_404(Record, pk=record_id)
+    journal = record.journal
+    form = RecordForm(request.POST or record, extended_stat=journal.downtime_stat)
+    if request.POST and form.is_valid():
+        journal.write_record(**form.cleaned_data)
+        if request.POST['submit'] == 'af':
+            return redirect('uptime:show', journal_id=journal_id)
+        else:
+            rec, rdate = journal.switch_date_get_rec(request.POST['rdate'], request.POST['submit'])
+            if rec:
+                return redirect('uptime:record_edit', {'journal': journal, 'record_id': rec.id})
+            else:
+                form = RecordForm(None, extended_stat=journal.downtime_stat, initial={'rdate': rdate})
+                return render(
+                    request,
+                    'uptime/record_new.html',
+                    {'form': form, 'journal': journal})
+    return render(request, 'uptime/record_edit.html', {'form': form, 'journal': journal, 'record_id': record.id})

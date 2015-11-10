@@ -30,6 +30,11 @@
                 <td class="text-center">{{ rec.krm }}</td>
                 <td class="text-center">{{ rec.srm }}</td>
                 <td class="text-center">{{ rec.rcd }}</td>
+                <td>
+                <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger" onclick="return confirm('Уверены, что хотите удалить запись?')">
+                        <span class="glyphicon glyphicon-minus-sign"></span>
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         {% elif journal.hot_rzv_stat %}
@@ -43,6 +48,10 @@
                 <td class="text-center">{{ rec.date }}</td>
                 <td class="text-center">{{ rec.work }}</td>
                 <td class="text-center">{{ rec.hrs }}</td>
+                <td><a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-minus-sign"></span>
+                    </a>
+                </td>
             </tr>
         {% else %}
             <tr>
@@ -53,6 +62,10 @@
             <tr>
                 <td class="text-center">{{ rec.rdate }}</td>
                 <td class="text-center">{{ rec.wrk }}</td>
+                <td><a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-minus-sign"></span>
+                    </a>
+                </td>
             </tr>
         {% endif %}
     </table>
