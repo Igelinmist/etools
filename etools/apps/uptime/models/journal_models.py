@@ -170,10 +170,10 @@ class Record(models.Model):
     def _in_state(self, state_name):
         try:
             for interval in self._prefetched_objects_cache['intervals']:
-                if interval.stat_code == state_name:
+                if interval.state_code == state_name:
                     return interval.stat_time
         except (AttributeError, KeyError):
-            print(self.__dict__)
+            print(self._prefetched_objects_cache['intervals'])
             q_set = self.intervals.filter(state_code=state_name)
             if q_set.exists():
                 return q_set[0].stat_time
@@ -235,6 +235,9 @@ class IntervalItem(models.Model):
     class Meta:
         db_table = 'intervals'
         default_permissions = []
+
+    def __str__(self):
+        return '%s>%s' % (self.state_code, self.stat_time)
 
     @property
     def stat_time(self):
