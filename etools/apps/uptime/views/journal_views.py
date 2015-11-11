@@ -33,7 +33,7 @@ def record_new(request, journal_id):
         else:
             rec, rdate = journal.switch_date_get_rec(request.POST['rdate'], request.POST['submit'])
             if rec:
-                return redirect('uptime:record_edit', {'journal': journal, 'record_id': rec.id})
+                return redirect('uptime:record_edit', journal_id=journal.id, record_id=rec.id)
             else:
                 form = RecordForm(None, extended_stat=journal.downtime_stat, initial={'rdate': rdate})
                 return render(
@@ -44,9 +44,8 @@ def record_new(request, journal_id):
 
 
 def record_edit(request, journal_id, record_id):
-    record = get_object_or_404(Record, pk=record_id)
-    journal = record.journal
-    form = RecordForm(request.POST or record, extended_stat=journal.downtime_stat)
+    journal = get_object_or_404(Journal, pk=journal_id)
+    form = RecordForm(request.POST or journal.get_record_data(record_id), extended_stat=journal.downtime_stat)
     if request.POST and form.is_valid():
         journal.write_record(**form.cleaned_data)
         if request.POST['submit'] == 'af':
@@ -54,11 +53,20 @@ def record_edit(request, journal_id, record_id):
         else:
             rec, rdate = journal.switch_date_get_rec(request.POST['rdate'], request.POST['submit'])
             if rec:
-                return redirect('uptime:record_edit', {'journal': journal, 'record_id': rec.id})
+                return redirect('uptime:record_edit', journal_id=journal.id, record_id=rec.id)
             else:
                 form = RecordForm(None, extended_stat=journal.downtime_stat, initial={'rdate': rdate})
                 return render(
                     request,
                     'uptime/record_new.html',
                     {'form': form, 'journal': journal})
-    return render(request, 'uptime/record_edit.html', {'form': form, 'journal': journal, 'record_id': record.id})
+    return render(request, 'uptime/record_edit.html', {'form': form, 'journal': journal, 'record_id': record_id})
+
+
+def record_delete(request, journal_id, record_id):
+    template_name = 'uptime/confirm_record_delete.html'
+    journal = get_object_or_404(Journal, pk=journal_id)
+    if request.method == 'POST':
+        journal.delete_record(record_id)
+        return redirect('uptime:show', journal_id=journal_id)
+    return render(request, template_name)

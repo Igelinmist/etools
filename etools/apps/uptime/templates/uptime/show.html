@@ -12,6 +12,8 @@
                 <th rowspan="2" class="text-center">Резерв</th>
                 <th colspan="4" class="text-center">Ремонт</th>
                 <th rowspan="2" class="text-center">Реконструкция</th>
+                <th rowspan="2" class="text-center">Остановы</th>
+                <th rowspan="2" class="text-center">Пуски</th>
                 <th rowspan="2"></th>
             </tr>
             <tr>
@@ -30,8 +32,13 @@
                 <td class="text-center">{{ rec.krm }}</td>
                 <td class="text-center">{{ rec.srm }}</td>
                 <td class="text-center">{{ rec.rcd }}</td>
+                <td class="text-center">{{ rec.down_cnt }}</td>
+                <td class="text-center">{{ rec.up_cnt }}</td>
                 <td>
-                <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger" onclick="return confirm('Уверены, что хотите удалить запись?')">
+                    <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-edit"></span>
+                    </a>
+                    <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
                         <span class="glyphicon glyphicon-minus-sign"></span>
                     </a>
                 </td>
@@ -42,13 +49,21 @@
                 <th class="text-center">Дата</th>
                 <th class="text-center">Работа</th>
                 <th class="text-center">Горячий резерв</th>
+                <th class="text-center">Остановы</th>
+                <th class="text-center">Пуски</th>
                 <th></th>
             </tr>
             <tr>
                 <td class="text-center">{{ rec.date }}</td>
                 <td class="text-center">{{ rec.work }}</td>
                 <td class="text-center">{{ rec.hrs }}</td>
-                <td><a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                <td class="text-center">{{ rec.down_cnt }}</td>
+                <td class="text-center">{{ rec.up_cnt }}</td>
+                <td>
+                    <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-edit"></span>
+                    </a>
+                    <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
                         <span class="glyphicon glyphicon-minus-sign"></span>
                     </a>
                 </td>
@@ -57,16 +72,27 @@
             <tr>
                 <th class="text-center">Дата</th>
                 <th class="text-center">Работа</th>
+                <th class="text-center">Остановы</th>
+                <th class="text-center">Пуски</th>
                 <th></th>
             </tr>
             <tr>
                 <td class="text-center">{{ rec.rdate }}</td>
                 <td class="text-center">{{ rec.wrk }}</td>
-                <td><a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                <td class="text-center">{{ rec.down_cnt }}</td>
+                <td class="text-center">{{ rec.up_cnt }}</td>
+                <td>
+                    <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-edit"></span>
+                    </a>
+                    <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
                         <span class="glyphicon glyphicon-minus-sign"></span>
                     </a>
                 </td>
             </tr>
         {% endif %}
     </table>
+    {% if not journal.stat_by_parent %}
+        <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />
+    {% endif %}
 {% endblock content %}

@@ -158,6 +158,28 @@ class Journal(models.Model):
         else:
             return None, new_date.strftime("%d.%m.%Y")
 
+    def delete_record(self, record_id):
+        rec = self.records.get(pk=record_id)
+        rec.delete()
+
+    def get_record_data(self, record_id):
+        """
+        Description: Метод получения данных для инициализации полей формы
+        существующей записью
+        """
+        data = {}
+        rec = self.records.get(pk=record_id)
+        print(rec.__dict__)
+        data['rdate'] = rec.rdate.strftime('%d.%m.%Y')
+        data['up_cnt'] = rec.up_cnt
+        data['down_cnt'] = rec.down_cnt
+        for state in INTERVAL_SET:
+            data[state] = '0:00'
+        # потом ненулевых состояний
+        for interval in rec._prefetched_objects_cache['intervals']:
+            data[interval.state_code] = interval.stat_time
+        return data
+
 
 class RecordManager(models.Manager):
 
