@@ -35,6 +35,7 @@ class Equipment(models.Model):
         verbose_name = 'оборудование'
         verbose_name_plural = 'оборудование'
 
+    @property
     def journal_id(self):
         try:
             return self.journal.id
@@ -43,7 +44,7 @@ class Equipment(models.Model):
 
     def unit_tree(self):
         """
-        Метод строит дерево (список) подчиненных объектов, включая отступ
+        Description: Метод строит дерево (список) подчиненных объектов, включая отступ
         глубины вложенности.
         """
         def get_knot_dict(units):
@@ -63,16 +64,26 @@ class Equipment(models.Model):
                 if eq.id in knot_dict:
                     get_tree(knot_dict, tree, ident, eq)
                 else:
-                    tree.append((dict(id=eq.id,
-                                      name=eq.name,
-                                      journal_id=eq.journal_id),
-                                 ident))
+                    tree.append((eq, ident))
 
         units = Equipment.objects.all()
         tree = []
         knot_dict = get_knot_dict(units)
         get_tree(knot_dict, tree, 0, self)
         return tree
+
+    def collect_sub_stat_on_date(self, stat_date):
+        """
+        Description: Метод собирает все наличествующие записи статистики для дерева
+        журналов (на базе дерева оборудования).
+        """
+        eq_list = self.unit_tree()
+        # Собрать все номера журналов
+        journal_set = {unit[0].journal_id for unit in eq_list if unit[0].journal_id}
+        records = Record.objects.filter(rdate=req_date(stat_date), journal_id__in=journal_set).all()
+        journals_records = {rec.journal_id: rec for rec in records}
+
+
 
 
 class JournalManager(models.Manager):
@@ -119,6 +130,10 @@ class Journal(models.Model):
         return plant_name + ' \ ' + self.equipment.name
 
     def write_record(self, rdate, **rdata):
+        """
+        Description: Метод создает новую запись (или обновляет существующую)
+        на основе входного словаря.
+        """
         # Разделяем словарь входных данных на то, что относится к записи
         # и то, что к интревалам
         rec_keys = rdata.keys() & RECORD_SET
@@ -144,12 +159,19 @@ class Journal(models.Model):
         return rec
 
     def get_last_records(self, depth=10):
+        """
+        Description: Метод возвращает выборку последних записей на нужную глубину.
+        """
         if self.stat_by_parent:
             return self.equipment.plant.journal.get_last_records(depth)
         else:
             return self.records.order_by('-rdate')[:depth]
 
     def switch_date_get_rec(self, curent_date_local, offset_str):
+        """
+        Description: Метод переключает дату от заданной на нужное смещение
+        и возвращает запись на новую дату при наличии.
+        """
         cur_date = datetime.strptime(curent_date_local, '%d.%m.%Y')
         new_date = cur_date + timedelta(int(offset_str))
         rset = self.records.filter(rdate=new_date.strftime("%Y-%m-%d"))
@@ -159,6 +181,9 @@ class Journal(models.Model):
             return None, new_date.strftime("%d.%m.%Y")
 
     def delete_record(self, record_id):
+        """
+        Description: Метод удаляет существующую запись статистики.
+        """
         rec = self.records.get(pk=record_id)
         rec.delete()
 
