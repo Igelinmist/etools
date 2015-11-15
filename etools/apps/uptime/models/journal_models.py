@@ -79,9 +79,26 @@ class Equipment(models.Model):
         """
         eq_list = self.unit_tree()
         # Собрать все номера журналов
-        journal_set = {unit[0].journal_id for unit in eq_list if unit[0].journal_id}
+        journal_set = {
+            eq.journal_id for eq, ident in eq_list
+                if eq.journal_id and not eq.journal.stat_by_parent
+        }
+        # для запроса существующих записей на дату
         records = Record.objects.filter(rdate=req_date(stat_date), journal_id__in=journal_set).all()
         journals_records = {rec.journal_id: rec for rec in records}
+        res = {'rdate': stat_date, 'rows': []}
+        for eq, ident in eq_list:
+            row = {}
+            if eq.journal_id and not eq.journal.stat_by_parent:
+                row['has_downtime'] = eq.journal.downtime_stat
+                if eq.journal_id in journals_records:
+                    row['record'] = journals_records[eq.journal_id]
+                else:
+                    row['record'] = None
+            else:
+                pass
+            res['rows'].append(row)
+        return res
 
 
 

@@ -1,7 +1,8 @@
 from django.test import TestCase
 from datetime import date, timedelta
 
-from uptime.models.journal_models import Equipment, Journal
+from ..models.journal_models import Equipment, Journal
+from ..constants import B_FORM, DS_FORM
 
 
 class JournalTestCase(TestCase):
@@ -78,3 +79,38 @@ class JournalTestCase(TestCase):
 
         self.assertEquals(rdate, '03.01.2015')
         self.assertEquals(rec, None)
+
+
+class EquipmentTestCase(TestCase):
+
+    def setUp(self):
+        gr = Equipment.objects.create(name='Group')
+        mu = Equipment.objects.create(name='Main Unit', plant=gr)
+        su = Equipment.objects.create(name='Sub Unit', plant=mu)
+        journal = Journal.objects.create(equipment=mu, downtime_stat=True)
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+        Journal.objects.create(equipment=su, stat_by_parent=True)
+
+    def test_collect_sub_stat_on_date_all_empty(self):
+        head_unit = Equipment.objects.filter(plant=None)[0]
+        sub_stat = head_unit.collect_sub_stat_on_date('02.01.2015')
+
+        self.assertEquals(sub_stat,
+                          [{'name': 'Group', 'ident': 0, 'form': 0},
+                           {'name': 'Main Unit',
+                            'ident': 1, 'form': B_FORM | DS_FORM,
+                            'rec_data': {}}])
+
+    def test_collect_sub_stat_on_date_has_record(self):
+        head_unit = Equipment.objects.filter(plant=None)[0]
+        sub_stat = head_unit.collect_sub_stat_on_date('01.01.2015')
+
+        self.assertEquals(sub_stat,
+                          [{'name': 'Group', 'ident': 0, 'form': 0},
+                           {'name': 'Main Unit',
+                            'ident': 1, 'form': B_FORM | DS_FORM,
+                            'rec_data': {'rdate': '01.01.2015',
+                                         'up_cnt': 0,
+                                         'down_cnt': 1,
+                                         'wrk': '15:00',
+                                         'arm': '09:00'}}])

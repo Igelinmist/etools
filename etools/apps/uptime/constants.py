@@ -25,3 +25,10 @@ RECORD_SET = {'rdate', 'down_cnt', 'up_cnt'}
 INTERVAL_SET = {'wrk', 'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}
 
 EXT_INTERVAL_SET = {'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}
+
+# Base form flag
+B_FORM = 0b0001
+# DownState form flag
+DS_FORM = 0b0010
+# HotReserv form flag
+HR_FORM = 0b0100
