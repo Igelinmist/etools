@@ -113,4 +113,10 @@ class EquipmentTestCase(TestCase):
                                          'up_cnt': 0,
                                          'down_cnt': 1,
                                          'wrk': '15:00',
-                                         'arm': '09:00'}}])
+                                         'rsv': '0:00',
+                                         'trm': '0:00',
+                                         'arm': '9:00',
+                                         'krm': '0:00',
+                                         'srm': '0:00',
+                                         'rcd': '0:00',
+                                         }}])

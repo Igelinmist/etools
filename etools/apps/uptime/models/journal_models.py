@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from django.db import models
 
 from ..constants import EVENT_CHOICES, STATE_CHOICES
-from ..constants import RECORD_SET, INTERVAL_SET
+from ..constants import RECORD_SET, INTERVAL_SET, B_FORM, DS_FORM, HR_FORM
 from ..utils import req_date, req_timedelta
 
 
@@ -81,23 +81,32 @@ class Equipment(models.Model):
         # Собрать все номера журналов
         journal_set = {
             eq.journal_id for eq, ident in eq_list
-                if eq.journal_id and not eq.journal.stat_by_parent
+            if eq.journal_id and not eq.journal.stat_by_parent
         }
         # для запроса существующих записей на дату
         records = Record.objects.filter(rdate=req_date(stat_date), journal_id__in=journal_set).all()
         journals_records = {rec.journal_id: rec for rec in records}
-        res = {'rdate': stat_date, 'rows': []}
+        res = []
         for eq, ident in eq_list:
             row = {}
             if eq.journal_id and not eq.journal.stat_by_parent:
-                row['has_downtime'] = eq.journal.downtime_stat
+                row['name'] = eq.name
+                row['ident'] = ident
+                row['form'] = B_FORM
+                if eq.journal.downtime_stat:
+                    row['form'] = row['form'] | DS_FORM
+                if eq.journal.hot_rzv_stat:
+                    row['form'] = row['form'] | HR_FORM
                 if eq.journal_id in journals_records:
-                    row['record'] = journals_records[eq.journal_id]
+                    row['rec_data'] = journals_records[eq.journal_id].data_dict()
                 else:
-                    row['record'] = None
-            else:
-                pass
-            res['rows'].append(row)
+                    row['rec_data'] = {}
+                res.append(row)
+            elif not eq.journal_id:
+                row['name'] = eq.name
+                row['ident'] = ident
+                row['form'] = 0
+                res.append(row)
         return res
 
 
@@ -209,18 +218,8 @@ class Journal(models.Model):
         Description: Метод получения данных для инициализации полей формы
         существующей записью
         """
-        data = {}
         rec = self.records.get(pk=record_id)
-        print(rec.__dict__)
-        data['rdate'] = rec.rdate.strftime('%d.%m.%Y')
-        data['up_cnt'] = rec.up_cnt
-        data['down_cnt'] = rec.down_cnt
-        for state in INTERVAL_SET:
-            data[state] = '0:00'
-        # потом ненулевых состояний
-        for interval in rec._prefetched_objects_cache['intervals']:
-            data[interval.state_code] = interval.stat_time
-        return data
+        return rec.data_dict()
 
 
 class RecordManager(models.Manager):
@@ -297,6 +296,22 @@ class Record(models.Model):
             if t_i_s:
                 self.intervals.create(state_code=interval,
                                       time_in_state=t_i_s)
+
+    def data_dict(self):
+        """
+        Description: Метод получения данных для инициализации полей формы
+        существующей записью
+        """
+        data = {}
+        data['rdate'] = self.rdate.strftime('%d.%m.%Y')
+        data['up_cnt'] = self.up_cnt
+        data['down_cnt'] = self.down_cnt
+        for state in INTERVAL_SET:
+            data[state] = '0:00'
+        # потом ненулевых состояний
+        for interval in self._prefetched_objects_cache['intervals']:
+            data[interval.state_code] = interval.stat_time
+        return data
 
 
 class IntervalItem(models.Model):
