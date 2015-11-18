@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^(?P<journal_id>\d+)/record_delete/(?P<record_id>\d+)$',
         journal_views.record_delete,
         name='record_delete'),
+    url(r'^records_on_date$', journal_views.records_on_date, name='records_on_date'),
 ]

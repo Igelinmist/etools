@@ -20,3 +20,7 @@ def req_timedelta(arg):
             return timedelta(hours=int(parts[0]), minutes=int(parts[1]))
         else:
             return timedelta(0)
+
+
+def yesterday_local():
+    return (date.today() - timedelta(days=1)).strftime("%d.%m.%Y")

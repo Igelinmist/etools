@@ -3,7 +3,7 @@ from bootstrap3_datetime.widgets import DateTimePicker
 from django import forms
 # import floppyforms as forms
 
-from .constants import INTERVAL_SET, EXT_INTERVAL_SET
+from ..constants import INTERVAL_SET, EXT_INTERVAL_SET
 
 
 class RecordForm(forms.Form):

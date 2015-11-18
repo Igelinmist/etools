@@ -1,7 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
-from ..models.journal_models import Equipment, Journal, Record
-from ..forms import RecordForm
+from ..models.journal_models import Equipment, Journal
+from ..forms.base_forms import RecordForm
+from ..forms.record_forms import BaseRecordForm, DownStatRecordForm
+from ..constants import B_FORM, DS_FORM
+from ..utils import yesterday_local
 
 
 def index(request):
@@ -70,3 +73,18 @@ def record_delete(request, journal_id, record_id):
         journal.delete_record(record_id)
         return redirect('uptime:show', journal_id=journal_id)
     return render(request, template_name)
+
+
+def records_on_date(request):
+    template_name = 'uptime/records_on_date.html'
+    rdate = request.POST.get('rdate', yesterday_local())
+    head_unit = Equipment.objects.filter(plant=None)[0]
+    data_table = head_unit.collect_sub_stat_on_date(rdate)
+    for row in data_table:
+        if row['form_type'] & DS_FORM:
+            row['form_content'] = DownStatRecordForm(row['rec_data'], auto_id=False)
+        elif row['form_type'] & B_FORM:
+            row['form_content'] = BaseRecordForm(row['rec_data'], auto_id=False)
+
+    context = {'rdate': rdate, 'data_table': data_table}
+    return render(request, template_name, context)

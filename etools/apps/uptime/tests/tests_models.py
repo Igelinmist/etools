@@ -96,9 +96,9 @@ class EquipmentTestCase(TestCase):
         sub_stat = head_unit.collect_sub_stat_on_date('02.01.2015')
 
         self.assertEquals(sub_stat,
-                          [{'name': 'Group', 'ident': 0, 'form': 0},
+                          [{'name': 'Group', 'ident': 0, 'form_type': 0},
                            {'name': 'Main Unit',
-                            'ident': 1, 'form': B_FORM | DS_FORM,
+                            'ident': 1, 'form_type': B_FORM | DS_FORM,
                             'rec_data': {}}])
 
     def test_collect_sub_stat_on_date_has_record(self):
@@ -106,9 +106,9 @@ class EquipmentTestCase(TestCase):
         sub_stat = head_unit.collect_sub_stat_on_date('01.01.2015')
 
         self.assertEquals(sub_stat,
-                          [{'name': 'Group', 'ident': 0, 'form': 0},
+                          [{'name': 'Group', 'ident': 0, 'form_type': 0},
                            {'name': 'Main Unit',
-                            'ident': 1, 'form': B_FORM | DS_FORM,
+                            'ident': 1, 'form_type': B_FORM | DS_FORM,
                             'rec_data': {'rdate': '01.01.2015',
                                          'up_cnt': 0,
                                          'down_cnt': 1,

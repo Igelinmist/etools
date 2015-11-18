@@ -91,25 +91,26 @@ class Equipment(models.Model):
             row = {}
             if eq.journal_id and not eq.journal.stat_by_parent:
                 row['name'] = eq.name
+                row['journal_id'] = eq.journal_id
                 row['ident'] = ident
-                row['form'] = B_FORM
+                row['form_type'] = B_FORM
                 if eq.journal.downtime_stat:
-                    row['form'] = row['form'] | DS_FORM
+                    row['form_type'] = row['form_type'] | DS_FORM
                 if eq.journal.hot_rzv_stat:
-                    row['form'] = row['form'] | HR_FORM
+                    row['form_type'] = row['form_type'] | HR_FORM
                 if eq.journal_id in journals_records:
                     row['rec_data'] = journals_records[eq.journal_id].data_dict()
                 else:
-                    row['rec_data'] = {}
+                    row['rec_data'] = {'rdate': stat_date, 'up_cnt': 0, 'down_cnt': 0}
+                    for state in INTERVAL_SET:
+                        row['rec_data'][state] = '0:00'
                 res.append(row)
             elif not eq.journal_id:
                 row['name'] = eq.name
                 row['ident'] = ident
-                row['form'] = 0
+                row['form_type'] = 0
                 res.append(row)
         return res
-
-
 
 
 class JournalManager(models.Manager):
@@ -260,6 +261,9 @@ class Record(models.Model):
 
     @property
     def wrk(self):
+        return self._in_state('wrk')
+
+    def _get_work(self):
         return self._in_state('wrk')
 
     @property

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load uptime_extras %}
+
+{% load staticfiles%}
+
+{% load widget_tweaks %}
+
+{% block content %}
+{% for data_row in data_table %}
+<div class="row">
+{% if data_row.form_type %}
+<div class="col-md-2"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
+<div class="col-md-10">
+<form class="form-inline" id="record-form-{{data_row.journal_id}}" role="form">
+{% csrf_token %}
+{{data_row.form_content}}
+</form>
+</div>
+{% else %}
+<div class="col-md-12"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
+{% endif %}
+</div>
+{% endfor %}
+{% endblock content %}
