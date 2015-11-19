@@ -12,4 +12,7 @@ urlpatterns = [
         journal_views.record_delete,
         name='record_delete'),
     url(r'^records_on_date$', journal_views.records_on_date, name='records_on_date'),
+    url(r'^silent_record_create_or_update$',
+        journal_views.silent_record_create_or_update,
+        name='silent_record_create_or_update'),
 ]
