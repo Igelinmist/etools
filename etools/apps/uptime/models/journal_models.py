@@ -166,7 +166,6 @@ class Journal(models.Model):
         rec_keys = rdata.keys() & RECORD_SET
         interval_keys = rdata.keys() & INTERVAL_SET
         rec_argv = {key: rdata[key] for key in rec_keys}
-        intervals_argv = {key: rdata[key] for key in interval_keys}
         # Пробуем найти запись на эту дату
         try:
             rec = self.records.filter(rdate=req_date(rdate))[0]
@@ -179,10 +178,13 @@ class Journal(models.Model):
             rec.save(update_fields=changed_fields)
             # Изменяем (удаляем -> создаем) интервалы
             rec.intervals.all().delete()
-            rec.set_intervals(intervals_argv)
+            for key in interval_keys:
+                rec.__setattr__(key, rdata[key])
+
         except IndexError:
             rec = self.records.create(rdate=req_date(rdate), **rec_argv)
-            rec.set_intervals(intervals_argv)
+            for key in interval_keys:
+                rec.__setattr__(key, rdata[key])
         return rec
 
     def get_last_records(self, depth=10):
@@ -286,13 +288,6 @@ class Record(models.Model):
     srm = StateDescriptor('srm')
     rcd = StateDescriptor('rcd')
 
-    def set_intervals(self, i_dict):
-        for interval in i_dict:
-            t_i_s = req_timedelta(i_dict[interval])
-            if t_i_s:
-                self.intervals.create(state_code=interval,
-                                      time_in_state=t_i_s)
-
     def data_dict(self):
         """
         Description: Метод получения данных для инициализации полей формы
@@ -303,10 +298,7 @@ class Record(models.Model):
         data['up_cnt'] = self.up_cnt
         data['down_cnt'] = self.down_cnt
         for state in INTERVAL_SET:
-            data[state] = '0:00'
-        # потом ненулевых состояний
-        for interval in self._prefetched_objects_cache['intervals']:
-            data[interval.state_code] = interval.stat_time
+            data[state] = self.__getattribute__(state)
         return data
 
 
