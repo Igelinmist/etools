@@ -35,12 +35,14 @@
                 <td class="text-center">{{ rec.down_cnt }}</td>
                 <td class="text-center">{{ rec.up_cnt }}</td>
                 <td>
-                    <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-edit"></span>
-                    </a>
-                    <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
-                        <span class="glyphicon glyphicon-minus-sign"></span>
-                    </a>
+                    {% if not journal.stat_by_parent %}
+                        <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-edit"></span>
+                        </a>
+                        <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-minus-sign"></span>
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -53,6 +55,7 @@
                 <th class="text-center">Пуски</th>
                 <th></th>
             </tr>
+            {% for rec in record_list %}
             <tr>
                 <td class="text-center">{{ rec.date }}</td>
                 <td class="text-center">{{ rec.work }}</td>
@@ -60,14 +63,17 @@
                 <td class="text-center">{{ rec.down_cnt }}</td>
                 <td class="text-center">{{ rec.up_cnt }}</td>
                 <td>
-                    <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-edit"></span>
-                    </a>
-                    <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
-                        <span class="glyphicon glyphicon-minus-sign"></span>
-                    </a>
+                    {% if not journal.stat_by_parent %}
+                        <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-edit"></span>
+                        </a>
+                        <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-minus-sign"></span>
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
+            {% endfor %}
         {% else %}
             <tr>
                 <th class="text-center">Дата</th>
@@ -76,20 +82,24 @@
                 <th class="text-center">Пуски</th>
                 <th></th>
             </tr>
+            {% for rec in record_list %}
             <tr>
                 <td class="text-center">{{ rec.rdate }}</td>
                 <td class="text-center">{{ rec.wrk }}</td>
                 <td class="text-center">{{ rec.down_cnt }}</td>
                 <td class="text-center">{{ rec.up_cnt }}</td>
                 <td>
-                    <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-edit"></span>
-                    </a>
-                    <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
-                        <span class="glyphicon glyphicon-minus-sign"></span>
-                    </a>
+                    {% if not journal.stat_by_parent %}
+                        <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-edit"></span>
+                        </a>
+                        <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-minus-sign"></span>
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
+            {% endfor %}
         {% endif %}
     </table>
     {% if not journal.stat_by_parent %}
