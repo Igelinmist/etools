@@ -5,49 +5,49 @@
 {% load staticfiles%}
 
 {% block head_ext %}
-    {{ form_date.media }}
+  {{ form_date.media }}
 {% endblock head_ext %}
 
 {% block content %}
-    <form action="" method="POST" class="form-inline">
-        {% csrf_token %}
-        {{ form_date }}
-        <input type="submit" value="Принять" class="btn btn-primary" />
-    </form><br />
-    {% for data_row in data_table %}
-        <div class="row">
-        {% if data_row.form_type %}
-            <div class="col-md-2"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
-            <div class="col-md-10">
-            <form action="{% url 'uptime:silent_record_create_or_update' %}" method="POST" class="form-inline record-form" id="record-form-{{data_row.journal_id}}" role="form">
-            {% csrf_token %}
-            <input type="hidden" name="journal_id" value="{{data_row.journal_id}}">
-            {{data_row.form_content}}
-            <input type="submit" value="Записать">
-            </form>
-            </div>
-        {% else %}
-            <div class="col-md-12"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
-        {% endif %}
-        </div>
-    {% endfor %}
+   <form action="" method="POST" class="form-inline">
+      {% csrf_token %}
+      {{ form_date }}
+      <input type="submit" value="Принять" class="btn btn-primary" />
+  </form><br />
+  {% for data_row in data_table %}
+      <div class="row">
+      {% if data_row.form_type %}
+          <div class="col-md-2"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
+           <div class="col-md-10">
+          <form action="{% url 'uptime:silent_record_create_or_update' %}" method="POST" class="form-inline record-form" id="record-form-{{data_row.journal_id}}" role="form">
+          {% csrf_token %}
+          <input type="hidden" name="journal_id" value="{{data_row.journal_id}}">
+          {{data_row.form_content}}
+          <input type="submit" value="Записать">
+          </form>
+          </div>
+      {% else %}
+          <div class="col-md-12"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
+      {% endif %}
+      </div>
+  {% endfor %}
 {% endblock content %}
 
 {% block javascript %}
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('.record-form').submit(function(event) {
-                event.preventDefault();
-                $.ajax({
-                    data: $(this).serialize(),
-                    type: $(this).attr('method'),
-                    url: $(this).attr('action'),
-                    success: function(data) {
-                        $("#record-form-"+data.journal_id).css("color", "gray");
-                    }
-                });
-                return false;
-            });
-        });
-    </script>
+  <script type="text/javascript">
+      $(document).ready(function() {
+          $('.record-form').submit(function(event) {
+              event.preventDefault();
+              $.ajax({
+                  data: $(this).serialize(),
+                  type: $(this).attr('method'),
+                  url: $(this).attr('action'),
+                  success: function(data) {
+                      $("#record-form-"+data.journal_id).css("color", "gray");
+                  }
+              });
+              return false;
+          });
+      });
+  </script>
 {% endblock javascript %}

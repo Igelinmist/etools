@@ -1,4 +1,6 @@
-{% load staticfiles %}<!DOCTYPE html>
+{% load staticfiles %}
+
+<!DOCTYPE html>
 <html lang="en" ng-app>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
@@ -6,6 +8,7 @@
     <meta name="keywords" content="{% block keywords %}{% endblock %}" />
     <meta name="viewport" content="{% block viewport %}width=device-width"{% endblock %}>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
 
     <title>{% block title %}etools{% endblock title %}</title>
 
@@ -17,13 +20,12 @@
     <link rel="icon" type="image/gif" href="{% static 'img/favicon.gif' %}">
 
     {% block css %}
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/navbar.css'%}" rel="stylesheet">
+      <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+      <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     {% endblock %}
-    <script src="{% static 'js/jquery-2.1.4.js' %}"></script>
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+
     {% block head_ext %} {% endblock head_ext %}
+
   </head>
   <body>
     <div class="container-fluid">
