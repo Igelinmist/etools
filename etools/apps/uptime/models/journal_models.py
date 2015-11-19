@@ -246,53 +246,45 @@ class Record(models.Model):
         db_table = 'records'
         unique_together = ('journal', 'rdate')
 
-    def _in_state(self, state_name):
-        try:
-            for interval in self._prefetched_objects_cache['intervals']:
-                if interval.state_code == state_name:
-                    return interval.stat_time
-        except (AttributeError, KeyError):
-            q_set = self.intervals.filter(state_code=state_name)
-            if q_set.exists():
-                return q_set[0].stat_time
+    class StateDescriptor:
+
+        def __init__(self, state_code):
+            self.state_code = state_code
+
+        def __get__(self, instance, owner):
+            try:
+                for interval in instance._prefetched_objects_cache['intervals']:
+                    if interval.state_code == self.state_code:
+                        return interval.stat_time
+            except (AttributeError, KeyError):
+                q_set = instance.intervals.filter(state_code=self.state_code)
+                if q_set.exists():
+                    return q_set[0].stat_time
+                else:
+                    return '0:00'
+            return '0:00'
+
+        def __set__(self, instance, value):
+            if isinstance(value, str):
+                try:
+                    hr, mnt = value.split(':')
+                    interval = timedelta(hours=int(hr), minutes=int(mnt))
+                except ValueError:
+                    return 'Bad value for timedelta'
+            elif isinstance(value, timedelta):
+                interval = value
             else:
-                return '0:00'
-        return '0:00'
+                return 'Bad value for timedelta'
+            instance.intervals.create(state_code=self.state_code, time_in_state=interval)
 
-    @property
-    def wrk(self):
-        return self._in_state('wrk')
-
-    def _get_work(self):
-        return self._in_state('wrk')
-
-    @property
-    def hrs(self):
-        return self._in_state('hrs')
-
-    @property
-    def rsv(self):
-        return self._in_state('rsv')
-
-    @property
-    def trm(self):
-        return self._in_state('trm')
-
-    @property
-    def arm(self):
-        return self._in_state('arm')
-
-    @property
-    def krm(self):
-        return self._in_state('krm')
-
-    @property
-    def srm(self):
-        return self._in_state('srm')
-
-    @property
-    def rcd(self):
-        return self._in_state('rcd')
+    wrk = StateDescriptor('wrk')
+    hrs = StateDescriptor('hrs')
+    rsv = StateDescriptor('rsv')
+    trm = StateDescriptor('trm')
+    arm = StateDescriptor('arm')
+    krm = StateDescriptor('krm')
+    srm = StateDescriptor('srm')
+    rcd = StateDescriptor('rcd')
 
     def set_intervals(self, i_dict):
         for interval in i_dict:
