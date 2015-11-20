@@ -3,105 +3,15 @@
 {% load staticfiles%}
 
 {% block content %}
-    <h3>Журнал статистики {{ journal.equipment }}</h3>
-    <table class="table table-condensed">
-        {% if journal.downtime_stat %}
-            <tr>
-                <th rowspan="2" class="text-center">Дата</th>
-                <th rowspan="2" class="text-center">Работа</th>
-                <th rowspan="2" class="text-center">Резерв</th>
-                <th colspan="4" class="text-center">Ремонт</th>
-                <th rowspan="2" class="text-center">Реконструкция</th>
-                <th rowspan="2" class="text-center">Остановы</th>
-                <th rowspan="2" class="text-center">Пуски</th>
-                <th rowspan="2"></th>
-            </tr>
-            <tr>
-                <th class="text-center">Текущий</th>
-                <th class="text-center">Аварийный</th>
-                <th class="text-center">Капитальный</th>
-                <th class="text-center">Средний</th>
-            </tr>
-            {% for rec in record_list %}
-            <tr>
-                <td class="text-center">{{ rec.rdate }}</td>
-                <td class="text-center">{{ rec.wrk }}</td>
-                <td class="text-center">{{ rec.rsv }}</td>
-                <td class="text-center">{{ rec.trm }}</td>
-                <td class="text-center">{{ rec.arm }}</td>
-                <td class="text-center">{{ rec.krm }}</td>
-                <td class="text-center">{{ rec.srm }}</td>
-                <td class="text-center">{{ rec.rcd }}</td>
-                <td class="text-center">{{ rec.down_cnt }}</td>
-                <td class="text-center">{{ rec.up_cnt }}</td>
-                <td>
-                    {% if not journal.stat_by_parent %}
-                        <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
-                            <span class="glyphicon glyphicon-edit"></span>
-                        </a>
-                        <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
-                            <span class="glyphicon glyphicon-minus-sign"></span>
-                        </a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        {% elif journal.hot_rzv_stat %}
-            <tr>
-                <th class="text-center">Дата</th>
-                <th class="text-center">Работа</th>
-                <th class="text-center">Горячий резерв</th>
-                <th class="text-center">Остановы</th>
-                <th class="text-center">Пуски</th>
-                <th></th>
-            </tr>
-            {% for rec in record_list %}
-            <tr>
-                <td class="text-center">{{ rec.date }}</td>
-                <td class="text-center">{{ rec.work }}</td>
-                <td class="text-center">{{ rec.hrs }}</td>
-                <td class="text-center">{{ rec.down_cnt }}</td>
-                <td class="text-center">{{ rec.up_cnt }}</td>
-                <td>
-                    {% if not journal.stat_by_parent %}
-                        <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
-                            <span class="glyphicon glyphicon-edit"></span>
-                        </a>
-                        <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
-                            <span class="glyphicon glyphicon-minus-sign"></span>
-                        </a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <th class="text-center">Дата</th>
-                <th class="text-center">Работа</th>
-                <th class="text-center">Остановы</th>
-                <th class="text-center">Пуски</th>
-                <th></th>
-            </tr>
-            {% for rec in record_list %}
-            <tr>
-                <td class="text-center">{{ rec.rdate }}</td>
-                <td class="text-center">{{ rec.wrk }}</td>
-                <td class="text-center">{{ rec.down_cnt }}</td>
-                <td class="text-center">{{ rec.up_cnt }}</td>
-                <td>
-                    {% if not journal.stat_by_parent %}
-                        <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
-                            <span class="glyphicon glyphicon-edit"></span>
-                        </a>
-                        <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
-                            <span class="glyphicon glyphicon-minus-sign"></span>
-                        </a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        {% endif %}
-    </table>
+    <h2>Журнал статистики <strong>{{ journal.equipment }}</strong></h2>
+    {% if journal.downtime_stat %}
+        {% include "uptime/partials/_records_base_and_downtime.html" %}
+    {% elif journal.hot_rzv_stat %}
+        {% include "uptime/partials/_records_base_and_hotreserv.html" %}
+    {% else %}
+        {% include "uptime/partials/_records_base.html" %}
+    {% endif %}
+
     {% if not journal.stat_by_parent %}
         <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />
     {% endif %}

@@ -1,0 +1,8 @@
+{% if not journal.stat_by_parent %}
+  <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
+    <span class="glyphicon glyphicon-edit"></span>
+  </a>
+  <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
+    <span class="glyphicon glyphicon-minus-sign"></span>
+  </a>
+{% endif %}
