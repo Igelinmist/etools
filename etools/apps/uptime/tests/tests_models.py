@@ -94,25 +94,39 @@ class EquipmentTestCase(TestCase):
     def test_collect_sub_stat_on_date_all_empty(self):
         head_unit = Equipment.objects.filter(plant=None)[0]
         sub_stat = head_unit.collect_sub_stat_on_date('02.01.2015')
+        journal = Journal.objects.all()[0]
 
         self.assertEquals(sub_stat,
                           [{'name': 'Group', 'ident': 0, 'form_type': 0},
                            {'name': 'Main Unit',
+                            'journal_id': journal.id,
                             'ident': 1, 'form_type': B_FORM | DS_FORM,
-                            'rec_data': {}}])
+                            'rec_data': {'rdate': '02.01.2015',
+                                         'wrk': '0:00',
+                                         'up_cnt': 0,
+                                         'down_cnt': 0,
+                                         'rsv': '0:00',
+                                         'trm': '0:00',
+                                         'arm': '0:00',
+                                         'krm': '0:00',
+                                         'srm': '0:00',
+                                         'rcd': '0:00',
+                                         }}])
 
     def test_collect_sub_stat_on_date_has_record(self):
         head_unit = Equipment.objects.filter(plant=None)[0]
         sub_stat = head_unit.collect_sub_stat_on_date('01.01.2015')
+        journal = Journal.objects.all()[0]
 
         self.assertEquals(sub_stat,
                           [{'name': 'Group', 'ident': 0, 'form_type': 0},
                            {'name': 'Main Unit',
+                            'journal_id': journal.id,
                             'ident': 1, 'form_type': B_FORM | DS_FORM,
                             'rec_data': {'rdate': '01.01.2015',
+                                         'wrk': '15:00',
                                          'up_cnt': 0,
                                          'down_cnt': 1,
-                                         'wrk': '15:00',
                                          'rsv': '0:00',
                                          'trm': '0:00',
                                          'arm': '9:00',
