@@ -1,5 +1,10 @@
 import sys
 from os.path import join, abspath, dirname
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
 
 # PATH vars
 
@@ -53,6 +58,7 @@ ROOT_URLCONF = 'etools.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'etools.wsgi.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
@@ -119,6 +125,10 @@ DATETIME_INPUT_FORMATS = (
     '%d.%m.%Y %H:%M',
     '%d.%m.%Y',
 )
+
+LOGIN_URL = '/login/'
+
+STATIC_ROOT = join(PROJECT_ROOT, 'static')
 
 # .local.py overrides all the common settings.
 try:

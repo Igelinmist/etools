@@ -17,7 +17,7 @@
   </tr>
   {% for rec in record_list %}
   <tr>
-    <td class="text-center">{{ rec.rdate }}</td>
+    <td class="text-center">{{ rec.rdate|date:"d.m.Y" }}</td>
     <td class="text-center">{{ rec.wrk }}</td>
     <td class="text-center">{{ rec.rsv }}</td>
     <td class="text-center">{{ rec.trm }}</td>

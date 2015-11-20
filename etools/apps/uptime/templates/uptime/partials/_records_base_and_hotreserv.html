@@ -9,8 +9,8 @@
   </tr>
   {% for rec in record_list %}
   <tr>
-    <td class="text-center">{{ rec.date }}</td>
-    <td class="text-center">{{ rec.work }}</td>
+    <td class="text-center">{{ rec.rdate|date:"d.m.Y" }}</td>
+    <td class="text-center">{{ rec.wrk }}</td>
     <td class="text-center">{{ rec.hrs }}</td>
     <td class="text-center">{{ rec.down_cnt }}</td>
     <td class="text-center">{{ rec.up_cnt }}</td>

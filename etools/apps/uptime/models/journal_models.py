@@ -4,7 +4,7 @@ from django.db import models
 
 from ..constants import EVENT_CHOICES, STATE_CHOICES
 from ..constants import RECORD_SET, INTERVAL_SET, B_FORM, DS_FORM, HR_FORM
-from ..utils import req_date, req_timedelta
+from ..utils import req_date
 
 
 class EquipmentManager(models.Manager):
@@ -277,7 +277,8 @@ class Record(models.Model):
                 interval = value
             else:
                 return 'Bad value for timedelta'
-            instance.intervals.create(state_code=self.state_code, time_in_state=interval)
+            if interval != timedelta(0):
+                instance.intervals.create(state_code=self.state_code, time_in_state=interval)
 
     wrk = StateDescriptor('wrk')
     hrs = StateDescriptor('hrs')
