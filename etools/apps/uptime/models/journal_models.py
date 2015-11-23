@@ -224,6 +224,17 @@ class Journal(models.Model):
         rec = self.records.get(pk=record_id)
         return rec.data_dict()
 
+    def get_journal_or_subjournal_id(self, part_name=None):
+        if part_name:
+            eq = self.equipment
+            try:
+                part = eq.parts.filter(name=part_name)[0]
+                return part.journal.id if part.journal else None
+            except IndexError:
+                return None
+        else:
+            return self.id
+
 
 class RecordManager(models.Manager):
 
