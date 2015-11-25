@@ -284,10 +284,10 @@ class Journal(models.Model):
             if date_to:
                 recs = recs.exclude(rdate__gte=date_to)
             if summary_type == 'PCN':
-                return recs.aggregate(models.Sum('pusk_cnt'))['pusk_cnt__sum']
+                return recs.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
             elif summary_type == 'OCN':
                 return recs.aggregate(
-                    models.Sum('ostanov_cnt'))['ostanov_cnt__sum']
+                    models.Sum('down_cnt'))['down_cnt__sum']
             else:
                 return journal.get_stat(
                     from_date=date_from,
