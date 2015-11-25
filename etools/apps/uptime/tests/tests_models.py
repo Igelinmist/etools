@@ -88,6 +88,27 @@ class JournalTestCase(TestCase):
         self.assertEquals(journal.get_stat(state_code='wrk'), '15')
         self.assertEquals(journal.get_stat(state_code='arm'), '9')
 
+    def test_get_report_cell_simple(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+
+        self.assertEquals(journal.get_report_cell(), '15')
+
+    def test_get_report_cell_stat_from_kr(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.11.2014', wrk='24:00')
+        journal.write_record('02.11.2014', krm='24:00', down_cnt=1)
+        journal.write_record('01.01.2015', krm='24:00')
+        journal.events.create(event_code='vkr', date='2015-01-02')
+        journal.write_record('02.01.2015', wrk='15:00', krm='9:00', up_cnt=1)
+
+        self.assertEquals(
+            journal.get_report_cell(summary_type='ITV', from_event='FKR'),
+            '15')
+        self.assertEquals(
+            journal.get_report_cell(summary_type='DT', from_event='FKR'),
+            '02.01.2015')
+
 
 class EquipmentTestCase(TestCase):
 

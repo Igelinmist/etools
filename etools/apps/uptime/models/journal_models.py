@@ -238,7 +238,6 @@ class Journal(models.Model):
             r_set = r_set.exclude(rdate__gte=to_date)
         r_set = r_set.filter(intervals__state_code=state_code)
         total = r_set.aggregate(models.Sum('intervals__time_in_state'))['intervals__time_in_state__sum']
-
         return stat_timedelta_for_report(total)
 
     def get_journal_or_subjournal_id(self, part_name=None):
@@ -290,8 +289,10 @@ class Journal(models.Model):
                 return recs.aggregate(
                     models.Sum('ostanov_cnt'))['ostanov_cnt__sum']
             else:
-                return stat_timedelta_for_report(
-                    recs.aggregate(models.Sum('work'))['work__sum']
+                return journal.get_stat(
+                    from_date=date_from,
+                    to_date=date_to,
+                    state_code='wrk'
                 )
         else:
             if summary_type in ('PCN', 'OCN'):
