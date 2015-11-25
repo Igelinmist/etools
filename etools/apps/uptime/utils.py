@@ -24,3 +24,14 @@ def req_timedelta(arg):
 
 def yesterday_local():
     return (date.today() - timedelta(days=1)).strftime("%d.%m.%Y")
+
+
+def stat_timedelta_for_report(time_delta):
+    if time_delta:
+        sec = time_delta.total_seconds()
+        hours, remainder = divmod(sec, 3600)
+        if remainder >= 1800:
+            hours += 1
+        return str(int(hours))
+    else:
+        return '-'

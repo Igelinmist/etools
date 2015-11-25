@@ -81,6 +81,12 @@ class JournalTestCase(TestCase):
         self.assertEquals(rdate, '03.01.2015')
         self.assertEquals(rec, None)
 
+    def test_get_report_cell(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+
+        self.assertEquals(journal.get_report_cell(), '15:00')
+
 
 class EquipmentTestCase(TestCase):
 

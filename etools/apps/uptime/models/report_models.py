@@ -47,30 +47,30 @@ class Report(models.Model):
             'parts': part_set
         }
 
-    # def prepare_report_data(self, report_date=None):
-    #     """
-    #     Метод заполняет данными таблицу для отчета
-    #     """
-    #     report_data = self.prepare_journals_id_for_report()
-    #     journals_id = report_data['journals_id']
-    #     columns = report_data['columns']
-    #     part_set = report_data['parts']
-    #     report_table = [
-    #         [subunit.name] + [
-    #             Journal.objects.get(
-    #                 pk=journals_id[indxr][indxc]
-    #             ).get_report_cell(
-    #                 from_event=col.from_event,
-    #                 summary_type=col.column_type,
-    #                 date_to=report_date
-    #             ) if journals_id[indxr][indxc] else '-'
-    #             for (indxc, col) in enumerate(columns)
-    #         ]
-    #         for (indxr, subunit) in enumerate(part_set)
-    #     ]
-    #     titles = ['Оборудование'] + [col.title for col in columns]
-    #     report_table = [titles] + report_table
-    #     return report_table
+    def prepare_report_data(self, report_date=None):
+        """
+        Метод заполняет данными таблицу для отчета
+        """
+        report_data = self.prepare_journals_id_for_report()
+        journals_id = report_data['journals_id']
+        columns = report_data['columns']
+        part_set = report_data['parts']
+        report_table = [
+            [subunit.name] + [
+                Journal.objects.get(
+                    pk=journals_id[indxr][indxc]
+                ).get_report_cell(
+                    from_event=col.from_event,
+                    summary_type=col.column_type,
+                    date_to=report_date
+                ) if journals_id[indxr][indxc] else '-'
+                for (indxc, col) in enumerate(columns)
+            ]
+            for (indxr, subunit) in enumerate(part_set)
+        ]
+        titles = ['Оборудование'] + [col.title for col in columns]
+        report_table = [titles] + report_table
+        return report_table
 
     # def get_reports_collection(root_unit):
     #     def unit_has_report(unit):

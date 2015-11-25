@@ -4,7 +4,7 @@ from django.db import models
 
 from ..constants import EVENT_CHOICES, STATE_CHOICES
 from ..constants import RECORD_SET, INTERVAL_SET, B_FORM, DS_FORM, HR_FORM
-from ..utils import req_date
+from ..utils import req_date, stat_timedelta_for_report
 
 
 class EquipmentManager(models.Manager):
@@ -224,6 +224,19 @@ class Journal(models.Model):
         rec = self.records.get(pk=record_id)
         return rec.data_dict()
 
+    # Методы для формирования отчетов
+
+    def get_stat(self, from_date=None, to_date=None, state_code='wrk'):
+        """
+        Description: Метод расчет суммарного времени нахождения в заданном состоянии
+        на временном интервале
+        """
+        r_set = self.records
+        if from_date:
+            r_set = r_set.filter(rdate__gte=from_date)
+        if to_date:
+            r_set = r_set.exclude(rdate__gte=to_date)
+
     def get_journal_or_subjournal_id(self, part_name=None):
         if part_name:
             eq = self.equipment
@@ -234,6 +247,55 @@ class Journal(models.Model):
                 return None
         else:
             return self.id
+
+    def get_report_cell(self, summary_type='ITV',
+                        from_event='FVZ', date_to=None):
+        journal = self.equipment.plant.journal if self.stat_by_parent else self
+        from_event_to_event_dict = {
+            'FVZ': 'zmn',
+            'FKR': 'vkr',
+            'FSR': 'vsr',
+            'FRC': 'vrc',
+        }
+        if journal.records.count():
+            try:
+                date_from = self.events.filter(
+                    event_code=from_event_to_event_dict[from_event]
+                ).order_by('-date')[0].date
+                if summary_type == 'DT':
+                    return date_from.strftime("%d.%m.%Y")
+            except IndexError:
+                date_from = None
+                if from_event != 'FVZ':
+                    return '-'
+                elif summary_type == 'DT':
+                    return '-'
+
+            recs = journal.records
+            if date_from:
+                # Время "от события" откатываем на месяц назад, поскольку
+                # капитальный и средный ремонты, замены и реконструкции
+                # длятся не менее месяца, а раньше интервалы фиксировались
+                # за месяц или год, что приводит к неверному расчету
+                recs = recs.filter(rdate__gte=date_from - timedelta(days=31))
+            if date_to:
+                recs = recs.exclude(rdate__gte=date_to)
+            if summary_type == 'PCN':
+                return recs.aggregate(models.Sum('pusk_cnt'))['pusk_cnt__sum']
+            elif summary_type == 'OCN':
+                return recs.aggregate(
+                    models.Sum('ostanov_cnt'))['ostanov_cnt__sum']
+            else:
+                return stat_timedelta_for_report(
+                    recs.aggregate(models.Sum('work'))['work__sum']
+                )
+        else:
+            if summary_type in ('PCN', 'OCN'):
+                return 0
+            elif summary_type == 'dt':
+                return '-'
+            else:
+                return '0:00'
 
 
 class RecordManager(models.Manager):
