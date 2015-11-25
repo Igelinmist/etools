@@ -81,11 +81,12 @@ class JournalTestCase(TestCase):
         self.assertEquals(rdate, '03.01.2015')
         self.assertEquals(rec, None)
 
-    def test_get_report_cell(self):
+    def test_get_stat(self):
         journal = Journal.objects.all()[0]
         journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
 
-        self.assertEquals(journal.get_report_cell(), '15:00')
+        self.assertEquals(journal.get_stat(state_code='wrk'), '15')
+        self.assertEquals(journal.get_stat(state_code='arm'), '9')
 
 
 class EquipmentTestCase(TestCase):
@@ -143,38 +144,38 @@ class EquipmentTestCase(TestCase):
                                          }}])
 
 
-class ReportTestCase(TestCase):
+# class ReportTestCase(TestCase):
 
-    def setUp(self):
-        eobj = Equipment.objects.create(name='EObject')
-        gr = Equipment.objects.create(name='Group')
-        mu = Equipment.objects.create(name='Unit', plant=gr)
-        su = Equipment.objects.create(name='SubUnit', plant=mu)
-        journal = Journal.objects.create(equipment=mu, downtime_stat=True)
-        journal.write_record('01.11.2014', wrk='24:00')
-        journal.write_record('02.11.2014', krm='24:00', down_cnt=1)
-        journal.write_record('01.01.2015', krm='24:00')
-        journal.events.create(event_code='vkr', date='2015-01-02')
-        journal.write_record('02.01.2015', wrk='15:00', krm='9:00', up_cnt=1)
-        Journal.objects.create(equipment=su, stat_by_parent=True)
-        Report.objects.create(equipment=eobj, is_generalizing=True, title='Report Name')
-        rep = Report.objects.create(equipment=gr, title='Units')
-        rep.columns.create(title='TotalWork', column_type='ITV', from_event='FVZ')
-        rep.columns.create(title='Vvod/Zamena', column_type='DT', from_event='FVZ', weight=1)
-        rep.columns.create(title='FromKR', column_type='ITV', from_event='FKR', weight=2)
-        rep.columns.create(title='VvodKR', column_type='DT', from_event='FKR', weight=3)
-        rep.columns.create(title='TotalWorkSubunit', column_type='ITV',
-                           from_event='FVZ', weight=4, element_name_filter='SubUnit')
-        rep.columns.create(title='ZamenaSubunit', column_type='DT',
-                           from_event='FVZ', weight=5, element_name_filter='SubUnit')
-        rep.columns.create(title='UpCnt', column_type='PCN', from_event='FVZ', weight=6)
-        rep.columns.create(title='DownCnt', column_type='OCN', from_event='FVZ', weight=7)
+#     def setUp(self):
+#         eobj = Equipment.objects.create(name='EObject')
+#         gr = Equipment.objects.create(name='Group')
+#         mu = Equipment.objects.create(name='Unit', plant=gr)
+#         su = Equipment.objects.create(name='SubUnit', plant=mu)
+#         journal = Journal.objects.create(equipment=mu, downtime_stat=True)
+#         journal.write_record('01.11.2014', wrk='24:00')
+#         journal.write_record('02.11.2014', krm='24:00', down_cnt=1)
+#         journal.write_record('01.01.2015', krm='24:00')
+#         journal.events.create(event_code='vkr', date='2015-01-02')
+#         journal.write_record('02.01.2015', wrk='15:00', krm='9:00', up_cnt=1)
+#         Journal.objects.create(equipment=su, stat_by_parent=True)
+#         Report.objects.create(equipment=eobj, is_generalizing=True, title='Report Name')
+#         rep = Report.objects.create(equipment=gr, title='Units')
+#         rep.columns.create(title='TotalWork', column_type='ITV', from_event='FVZ')
+#         rep.columns.create(title='Vvod/Zamena', column_type='DT', from_event='FVZ', weight=1)
+#         rep.columns.create(title='FromKR', column_type='ITV', from_event='FKR', weight=2)
+#         rep.columns.create(title='VvodKR', column_type='DT', from_event='FKR', weight=3)
+#         rep.columns.create(title='TotalWorkSubunit', column_type='ITV',
+#                            from_event='FVZ', weight=4, element_name_filter='SubUnit')
+#         rep.columns.create(title='ZamenaSubunit', column_type='DT',
+#                            from_event='FVZ', weight=5, element_name_filter='SubUnit')
+#         rep.columns.create(title='UpCnt', column_type='PCN', from_event='FVZ', weight=6)
+#         rep.columns.create(title='DownCnt', column_type='OCN', from_event='FVZ', weight=7)
 
-    def test_prepare_journals_id_for_report(self):
-        rep = Report.objects.filter(title='Units')[0]
-        eq_set = Equipment.objects
-        j = eq_set.filter(name='Unit')[0].journal.id
-        sj = eq_set.filter(name='SubUnit')[0].journal.id
+#     def test_prepare_journals_id_for_report(self):
+#         rep = Report.objects.filter(title='Units')[0]
+#         eq_set = Equipment.objects
+#         j = eq_set.filter(name='Unit')[0].journal.id
+#         sj = eq_set.filter(name='SubUnit')[0].journal.id
 
-        self.assertEquals(rep.prepare_journals_id_for_report()['journals_id'],
-                          [[j, j, j, j, sj, sj, j, j]])
+#         self.assertEquals(rep.prepare_journals_id_for_report()['journals_id'],
+#                           [[j, j, j, j, sj, sj, j, j]])

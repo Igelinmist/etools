@@ -228,14 +228,18 @@ class Journal(models.Model):
 
     def get_stat(self, from_date=None, to_date=None, state_code='wrk'):
         """
-        Description: Метод расчет суммарного времени нахождения в заданном состоянии
-        на временном интервале
+        Description: Метод расчет суммарного времени нахождения в некотором состоянии
+        (по умолчанию в работе) на временном интервале
         """
         r_set = self.records
         if from_date:
             r_set = r_set.filter(rdate__gte=from_date)
         if to_date:
             r_set = r_set.exclude(rdate__gte=to_date)
+        r_set = r_set.filter(intervals__state_code=state_code)
+        total = r_set.aggregate(models.Sum('intervals__time_in_state'))['intervals__time_in_state__sum']
+
+        return stat_timedelta_for_report(total)
 
     def get_journal_or_subjournal_id(self, part_name=None):
         if part_name:
