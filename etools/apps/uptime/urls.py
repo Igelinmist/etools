@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import journal_views
+from .views import journal_views, report_views
 
 urlpatterns = [
     url(r'^$', journal_views.index, name='index'),
@@ -15,4 +15,10 @@ urlpatterns = [
     url(r'^silent_record_create_or_update$',
         journal_views.silent_record_create_or_update,
         name='silent_record_create_or_update'),
+    url(r'^reports/$',
+        report_views.reports,
+        name='reports'),
+    url(r'^reports/viewreport$',
+        report_views.report_show,
+        name='report_show'),
 ]

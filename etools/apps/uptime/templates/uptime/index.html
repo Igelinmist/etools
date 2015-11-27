@@ -9,7 +9,7 @@
     <table class="table table-condensed table-hover">
         {% for unit, ident in equipment_list %}
             <tr>
-            {% if unit.journal.id %}
+            {% if unit.journal_id %}
                 <td>{{ ident|make_ident }}<strong>{{ unit.name }}</strong></td>
                 <td><a href="{% url 'uptime:show' unit.journal.id %}" class="btn btn-primary" role="button">журнал</a></td>
             {% else %}

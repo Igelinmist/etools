@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Отчет по наработке <small> на
+        {% if rdate %}
+            {{ rdate }}
+        {% else %}
+            текущую дату
+        {% endif %}
+    </small></h2>
+    {% for report, rtable in rdata %}
+    <table class="table table-bordered table-condensed">
+        <h3>{{ report.title }}</h3>
+        {% for row in rtable %}
+        {% if forloop.first %}
+            <thead>
+                <tr>
+                    {% for cell in row %}
+                        <th class="text-center">{{ cell }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+        {% else %}
+            <tr>
+                {% for cell in row %}
+                    <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    {% endfor %}
+{% endblock content %}

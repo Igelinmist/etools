@@ -3,7 +3,7 @@
 {% load staticfiles%}
 
 {% block content %}
-    <h2>Журнал статистики <strong>{{ journal.equipment }}</strong></h2>
+    <h2>Журнал статистики <strong>{{ journal }}</strong></h2>
     {% if journal.downtime_stat %}
         {% include "uptime/partials/_records_base_and_downtime.html" %}
     {% elif journal.hot_rzv_stat %}

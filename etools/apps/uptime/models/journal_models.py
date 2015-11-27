@@ -10,7 +10,7 @@ from ..utils import req_date, stat_timedelta_for_report
 class EquipmentManager(models.Manager):
 
     def get_queryset(self):
-        return super(EquipmentManager, self).get_queryset().select_related()
+        return super(EquipmentManager, self).get_queryset().select_related('journal')
 
 
 class Equipment(models.Model):
@@ -35,11 +35,13 @@ class Equipment(models.Model):
         verbose_name = 'оборудование'
         verbose_name_plural = 'оборудование'
 
+    objects = EquipmentManager()
+
     @property
     def journal_id(self):
-        try:
-            return self.journal.id
-        except Journal.DoesNotExist:
+        if self._journal_cache:
+            return self._journal_cache.id
+        else:
             return None
 
     def unit_tree(self):
@@ -153,8 +155,8 @@ class Journal(models.Model):
         )
 
     def __str__(self):
-        plant_name = self.equipment.plant.name if self.equipment.plant else '-'
-        return plant_name + ' \ ' + self.equipment.name
+        plant_name = self._equipment_cache.plant.name if self._equipment_cache.plant else '-'
+        return plant_name + ' \ ' + self._equipment_cache.name
 
     def write_record(self, rdate, **rdata):
         """
@@ -324,7 +326,7 @@ class Record(models.Model):
 
     class Meta:
         db_table = 'records'
-        unique_together = ('journal', 'rdate')
+        # unique_together = ('journal', 'rdate')
 
     class StateDescriptor:
 

@@ -169,7 +169,7 @@ class ReportTestCase(TestCase):
 
     def setUp(self):
         eobj = Equipment.objects.create(name='EObject')
-        gr = Equipment.objects.create(name='Group')
+        gr = Equipment.objects.create(name='Group', plant=eobj)
         mu = Equipment.objects.create(name='Unit', plant=gr)
         su = Equipment.objects.create(name='SubUnit', plant=mu)
         journal = Journal.objects.create(equipment=mu, downtime_stat=True)
@@ -208,4 +208,12 @@ class ReportTestCase(TestCase):
             rep.prepare_report_data(), [
                 ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'TWS', 'ZSu', 'UpCnt', 'DownCnt'],
                 ['Unit', '39', '-', '15', '02.01.2015', '39', '-', 1, 1]]
+        )
+
+    def test_prepare_reports_content(self):
+        rep = Report.objects.filter(title='Report Name')[0]
+
+        self.assertEquals(rep.prepare_reports_content(), [rep, [
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'TWS', 'ZSu', 'UpCnt', 'DownCnt'],
+                ['Unit', '39', '-', '15', '02.01.2015', '39', '-', 1, 1]]]
         )

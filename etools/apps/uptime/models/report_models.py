@@ -1,5 +1,4 @@
 from django.db import models
-from datetime import datetime
 
 from .journal_models import Equipment, Journal
 
@@ -72,52 +71,58 @@ class Report(models.Model):
         report_table = [titles] + report_table
         return report_table
 
-    # def get_reports_collection(root_unit):
-    #     def unit_has_report(unit):
-    #         try:
-    #             if unit.report:
-    #                 return True
-    #         except Report.DoesNotExist:
-    #             return False
+    def get_reports_collection(root_eq):
+        """
+        Description: Метод готовит коллекцию отчетов для дерева
+        оборудования.
+        """
 
-    #     report_set = []
-    #     equipment_tree = root_unit.unit_tree()
-    #     for eq, ident in equipment_tree:
-    #         if unit_has_report(eq):
-    #             report_set.append(
-    #                 (eq.report.id, '--' * ident + eq.report.title)
-    #             )
-    #     return report_set
+        def eq_has_report(equipment):
+            try:
+                if equipment.report:
+                    return True
+            except Report.DoesNotExist:
+                return False
 
-    # def prepare_reports_content(self, on_date=None):
-    #     """
-    #     Метод готовит одну или несколько таблиц отчетов,
-    #     в зависимости от того, является ли текущий отчет
-    #     обобщающим. Предполагается, что дата поступает
-    #     в российском формате, надо ее переводить в формат,
-    #     который переваривает django запрос.jc/
-    #     """
-    #     qdate = datetime.strptime(
-    #         on_date,
-    #         '%d.%m.%Y'
-    #     ).strftime('%Y-%m-%d') if on_date else None
-    #     report_reportes = []
-    #     if self.is_generalizing:
-    #         for eq in self.equipment.unit_set.order_by('name').all():
-    #             try:
-    #                 temp_report = eq.report
-    #                 temp_report_table = temp_report.prepare_report_data(
-    #                     report_date=qdate
-    #                 )
-    #                 report_reportes.append((temp_report, temp_report_table))
-    #             except Report.DoesNotExist:
-    #                 continue
-    #     else:
-    #         report_reportes.append(
-    #             (self,
-    #              self.prepare_report_data(report_date=qdate))
-    #         )
-    #     return report_reportes
+        report_set = []
+        equipment_tree = root_eq.unit_tree()
+        for eq, ident in equipment_tree:
+            if eq_has_report(eq):
+                report_set.append(
+                    (eq.report.id, '--' * ident + eq.report.title)
+                )
+        return report_set
+
+    def prepare_reports_content(self, ru_date=None):
+        """
+        Метод готовит одну или несколько таблиц отчетов,
+        в зависимости от того, является ли исходный отчет
+        обобщающим. Предполагается, что дата поступает
+        в российском формате, надо ее переводить в формат,
+        который переваривает django запрос.
+        """
+        if ru_date:
+            d, m, y = ru_date.split('.')
+            qdate = '{}-{}-{}'.format(y, m, d)
+        else:
+            qdate = None
+        report_list = []
+        if self.is_generalizing:
+            for eq in self.equipment.parts.order_by('name').all():
+                try:
+                    temp_report = eq.report
+                    temp_report_table = temp_report.prepare_report_data(
+                        report_date=qdate
+                    )
+                    report_list.append((temp_report, temp_report_table))
+                except Report.DoesNotExist:
+                    continue
+        else:
+            report_list.append(
+                (self,
+                 self.prepare_report_data(report_date=qdate))
+            )
+        return report_list
 
 
 TYPE_CHOICES = (
@@ -141,7 +146,7 @@ class Column(models.Model):
     """
 
     report = models.ForeignKey(
-        'Report',
+        Report,
         related_name='columns',
         on_delete=models.CASCADE,
     )
