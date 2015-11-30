@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% load staticfiles%}
+
+{% load uptime_extras %}
+
+{% block content %}
+    <h2>Журнал статистики <strong>{{ journal }}</strong></h2>
+    {% if not journal.stat_by_parent %}
+        <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />
+    {% endif %}
+    <nav>
+        <ul class="pagination">
+            {% if record_list.has_previous %}
+                <li>
+                    <a href="?page={{ record_list.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+                <li>
+                    <span class="current">
+                        страница {{ record_list.number }} из {{ record_list.paginator.num_pages }}
+                    </span>
+                </li>
+            {% if record_list.has_next %}
+                <li>
+                    <a href="?page={{ record_list.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% if journal.downtime_stat %}
+        {% include "uptime/partials/_records_base_and_downtime.html" %}
+    {% elif journal.hot_rzv_stat %}
+        {% include "uptime/partials/_records_base_and_hotreserv.html" %}
+    {% else %}
+        {% include "uptime/partials/_records_base.html" %}
+    {% endif %}
+    <nav>
+        <ul class="pagination">
+            {% if record_list.has_previous %}
+                <li>
+                    <a href="?page={{ record_list.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+                <li>
+                    <span class="current">
+                        страница {{ record_list.number }} из {{ record_list.paginator.num_pages }}
+                    </span>
+                </li>
+            {% if record_list.has_next %}
+                <li>
+                    <a href="?page={{ record_list.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% if not journal.stat_by_parent %}
+        <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />
+    {% endif %}
+    <br \>
+    <p>
+        <a href="{% url 'uptime:index' %}" class="btn btn-default active" role="button">К журналам</a>
+        <a href="{% url 'uptime:show' journal.id %}" class="btn btn-default active" role="button">Последние записи</a>
+    </p>
+{% endblock content %}

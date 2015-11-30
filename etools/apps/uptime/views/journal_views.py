@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from ..models.journal_models import Equipment, Journal
+from ..models.journal_models import Equipment, Journal, EventItem
 from ..forms.base_forms import RecordForm
-from ..forms.record_forms import BaseRecordForm, DownStatRecordForm, ChooseRecordsDateForm
+from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, ChooseRecordsDateForm, EventForm
 from ..constants import B_FORM, DS_FORM
 from ..utils import yesterday_local
 
@@ -18,11 +19,12 @@ def show(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     record_list = journal.get_last_records(depth=5)
     event_list = journal.events.order_by('-date')[:3]
-    # TODO добавить форму для события
+    form = EventForm(None)
     context = {
         'journal': journal,
         'record_list': record_list,
         'event_list': event_list,
+        'form': form,
     }
     return render(request, 'uptime/show.html', context)
 
@@ -108,3 +110,37 @@ def silent_record_create_or_update(request):
     else:
         response = {'status': -1}
     return JsonResponse(response)
+
+
+def records(request, journal_id):
+    journal = get_object_or_404(Journal, pk=journal_id)
+    all_records = journal.records.order_by('-rdate').all()
+    paginator = Paginator(all_records, 25)
+    page = request.GET.get('page')
+    try:
+        paged_records = paginator.page(page)
+    except PageNotAnInteger:
+        paged_records = paginator.page(1)
+    except EmptyPage:
+        paged_records = paginator.page(paginator.num_pages)
+    return render(
+        request,
+        'uptime/records.html',
+        {'record_list': paged_records, 'journal': journal})
+
+
+def event_create(request, journal_id):
+    journal = get_object_or_404(Journal, pk=journal_id)
+    form = EventForm(request.POST)
+    if request.POST and form.is_valid():
+        journal.set_event_data(form.cleaned_data)
+    return redirect('uptime:show', journal_id=journal_id)
+
+
+def event_delete(request, journal_id, event_id):
+    template_name = 'uptime/confirm_record_delete.html'
+    event = get_object_or_404(EventItem, pk=event_id)
+    if request.method == 'POST':
+        event.delete()
+        return redirect('uptime:show', journal_id=journal_id)
+    return render(request, template_name)

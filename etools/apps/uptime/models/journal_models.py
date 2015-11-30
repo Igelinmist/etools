@@ -102,10 +102,12 @@ class Equipment(models.Model):
                     row['form_type'] = row['form_type'] | HR_FORM
                 if eq.journal_id in journals_records:
                     row['rec_data'] = journals_records[eq.journal_id].data_dict()
+                    row['has_record'] = True
                 else:
                     row['rec_data'] = {'rdate': stat_date, 'up_cnt': 0, 'down_cnt': 0}
                     for state in INTERVAL_SET:
                         row['rec_data'][state] = '0:00'
+                    row['has_record'] = False
                 res.append(row)
             elif not eq.journal_id:
                 row['name'] = eq.name
@@ -225,6 +227,11 @@ class Journal(models.Model):
         """
         rec = self.records.get(pk=record_id)
         return rec.data_dict()
+
+    def set_event_data(self, data):
+        self.events.create(
+            date=data['date'],
+            event_code=data['event_code'])
 
     # Методы для формирования отчетов
 

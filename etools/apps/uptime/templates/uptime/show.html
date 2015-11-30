@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
+{% load uptime_extras %}
+
 {% load staticfiles%}
 
+{% block head_ext %}
+  {{ form.media }}
+{% endblock head_ext %}
+
 {% block content %}
-    <h2>Журнал статистики <strong>{{ journal }}</strong></h2>
+    <h2>Последние записи статистики <strong>{{ journal }}</strong></h2>
     {% if journal.downtime_stat %}
         {% include "uptime/partials/_records_base_and_downtime.html" %}
     {% elif journal.hot_rzv_stat %}
@@ -15,4 +21,38 @@
     {% if not journal.stat_by_parent %}
         <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />
     {% endif %}
+    <h3>Записи событий</h3>
+    <table class="table table-condensed">
+        <tr>
+            <th>Дата</th>
+            <th>Событие</th>
+            <th></th>
+        </tr>
+        {% for event in event_list %}
+            <tr>
+                <td>{{ event.date }}</td>
+                <td>{{ event.event_code|human_event }}</td>
+                <td>
+                    {# {% if user.is_authenticated and perms.statistics.delete_journal_event %} #}
+                    <a href="{% url 'uptime:event_delete' journal.id event.id %}" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-minus-sign"></span>
+                    </a>
+                    {# {% endif %} #}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {# {% if user.is_authenticated and perms.statistics.create_journal_event %} #}
+        <form action="{% url 'uptime:event_new' journal.id %}" method="post" class="form-inline">
+            {% csrf_token %}
+            {{ form }}
+        <input type="submit" value="Добавить" class="btn btn-primary"/>
+        </form>
+    {# {% endif %} #}
+    <br />
+    <p>
+        <a href="{% url 'uptime:index' %}" class="btn btn-default active" role="button">К журналам</a>
+        <a href="{% url 'uptime:records_on_date' %}" class="btn btn-default active" role="button">К вводу на дату</a>
+        <a href="{% url 'uptime:records' journal.id %}" class="btn btn-default active" role="button">Архив записей</a>
+    </p>
 {% endblock content %}
