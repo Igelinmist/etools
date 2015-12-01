@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import permission_required
 
 from ..models.journal_models import Equipment, Journal, EventItem
 from ..forms.base_forms import RecordForm
@@ -29,6 +30,8 @@ def show(request, journal_id):
     return render(request, 'uptime/show.html', context)
 
 
+@permission_required('uptime.create_journal_record',
+                     login_url='login')
 def record_new(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     form = RecordForm(request.POST or None, extended_stat=journal.downtime_stat)
@@ -49,6 +52,8 @@ def record_new(request, journal_id):
     return render(request, 'uptime/record_new.html', {'form': form, 'journal': journal})
 
 
+@permission_required('uptime.edit_journal_record',
+                     login_url='login')
 def record_edit(request, journal_id, record_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     form = RecordForm(request.POST or journal.get_record_data(record_id), extended_stat=journal.downtime_stat)
@@ -69,6 +74,8 @@ def record_edit(request, journal_id, record_id):
     return render(request, 'uptime/record_edit.html', {'form': form, 'journal': journal, 'record_id': record_id})
 
 
+@permission_required('uptime.delete_journal_record',
+                     login_url='login')
 def record_delete(request, journal_id, record_id):
     template_name = 'uptime/confirm_record_delete.html'
     journal = get_object_or_404(Journal, pk=journal_id)
@@ -78,6 +85,8 @@ def record_delete(request, journal_id, record_id):
     return render(request, template_name)
 
 
+@permission_required('uptime.create_journal_record',
+                     login_url='login')
 def records_on_date(request):
     template_name = 'uptime/records_on_date.html'
     rdate = request.POST.get('rdate', yesterday_local())
@@ -94,6 +103,8 @@ def records_on_date(request):
     return render(request, template_name, context)
 
 
+@permission_required('uptime.create_journal_record',
+                     login_url='login')
 def silent_record_create_or_update(request):
     if request.is_ajax():
         if request.POST['form_type'] == 'base':
@@ -129,6 +140,8 @@ def records(request, journal_id):
         {'record_list': paged_records, 'journal': journal})
 
 
+@permission_required('uptime.create_journal_event',
+                     login_url='login')
 def event_create(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     form = EventForm(request.POST)
@@ -137,6 +150,8 @@ def event_create(request, journal_id):
     return redirect('uptime:show', journal_id=journal_id)
 
 
+@permission_required('uptime.delete_journal_event',
+                     login_url='login')
 def event_delete(request, journal_id, event_id):
     template_name = 'uptime/confirm_record_delete.html'
     event = get_object_or_404(EventItem, pk=event_id)

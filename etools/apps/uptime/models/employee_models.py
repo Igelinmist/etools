@@ -5,6 +5,6 @@ from django.db import models
 
 
 class Employee(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, related_name='profile')
     department = models.CharField(max_length=100)
-    equipment = models.ForeignKey('Equipment', related_name='profile')
+    equipment = models.ForeignKey('Equipment')

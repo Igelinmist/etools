@@ -3,7 +3,7 @@
 {{ form.media }}
 {% endblock head_ext %}
 {% block content %}
-<form action="{% url 'statistics:report_show' %}" method="get" class="form-inline">
+<form action="{% url 'uptime:report_show' %}" method="get" class="form-inline">
     {{ form }}
     <input type="submit" value="Сформировать" class="btn btn-default" />
 </form>

@@ -9,8 +9,7 @@ def reports(request):
     root = Equipment.objects.filter(plant=None)[0]
     if request.user.is_authenticated():
         try:
-            root = Equipment.objects.get(name=request.user.profile.
-                                         responsible_for_equipment.name)
+            root = request.user.profile.equipment
         except AttributeError:
             pass
     report_choices = Report.get_reports_collection(root)

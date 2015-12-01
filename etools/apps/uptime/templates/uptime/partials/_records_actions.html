@@ -1,8 +1,12 @@
 {% if not journal.stat_by_parent %}
+  {% if perms.uptime.edit_journal_record %}
   <a href="{% url 'uptime:record_edit' journal.id rec.id %}" class="btn btn-primary">
     <span class="glyphicon glyphicon-edit"></span>
   </a>
+  {% endif %}
+  {% if perms.uptime.delete_journal_record %}
   <a href="{% url 'uptime:record_delete' journal.id rec.id %}" class="btn btn-danger">
     <span class="glyphicon glyphicon-minus-sign"></span>
   </a>
+  {% endif %}
 {% endif %}

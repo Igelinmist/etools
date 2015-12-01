@@ -31,7 +31,7 @@
           {{data_row.form_content}}
           <input type="submit" value="Записать" 
             {% if data_row.has_record %}
-              class="apply-btn invisible" 
+              class="apply-btn hidden" 
             {% else %}
               class="apply-btn"
             {% endif %}
@@ -47,28 +47,28 @@
 
 {% block javascript %}
   <script type="text/javascript">
-      $(document).ready(function() {
-          $(".record-form").submit(function(event) {
-              event.preventDefault();
-              $.ajax({
-                  data: $(this).serialize(),
-                  type: $(this).attr("method"),
-                  url: $(this).attr("action"),
-                  success: function(data) {
-                      $("#record-form-"+data.journal_id).css("color", "gray");
-                      $("#record-form-"+data.journal_id).find(".apply-btn").css("display", "none")
-                  }
-              });
-              return false;
-          });
-          $(".interval").bind("dblclick", function(e) {
-            e.preventDefault();
-            $(this).val("24:00");
-            $(this).trigger("change")
-          });
-          $("input").change(function() {
-            $(this).parent().find(".apply-btn").css("display", "inline")
-          });
+    $(document).ready(function() {
+      $(".record-form").submit(function(event) {
+        event.preventDefault();
+        $.ajax({
+          data: $(this).serialize(),
+          type: $(this).attr("method"),
+          url: $(this).attr("action"),
+          success: function(data) {
+            $("#record-form-"+data.journal_id).css("color", "gray");
+            $("#record-form-"+data.journal_id).find(".apply-btn").hide();
+          }
+        });
+        return false;
       });
+        $(".interval").bind("dblclick", function(e) {
+          e.preventDefault();
+          $(this).val("24:00");
+          $(this).trigger("change")
+        });
+        $("input").change(function() {
+          $(this).parent().find(".apply-btn").show();
+        });
+    });
   </script>
 {% endblock javascript %}
