@@ -24,7 +24,7 @@ class Report(models.Model):
         default_permissions = []
         db_table = 'reports'
 
-    def prepare_journals_id_for_report(self):
+    def find_journals_for_report(self):
         """
         Подготовка промежуточной таблицы для формирования отчета.
         В ячейках вместо данных содержится id журнала, из которого необходимо
@@ -32,16 +32,16 @@ class Report(models.Model):
         """
         columns = self.columns.order_by('weight').all()
         part_set = self.equipment.parts.order_by('name').all()
-        journals_id_table = []
+        journals_table = []
         for part in part_set:
-            journals_id_table.append([
-                part.journal.get_journal_or_subjournal_id(
+            journals_table.append([
+                part.journal.get_journal_or_subjournal(
                     col.element_name_filter
                 )
                 for col in columns
             ])
         return {
-            'journals_id': journals_id_table,
+            'journals': journals_table,
             'columns': columns,
             'parts': part_set
         }
@@ -50,19 +50,17 @@ class Report(models.Model):
         """
         Метод заполняет данными таблицу для отчета
         """
-        report_data = self.prepare_journals_id_for_report()
-        journals_id = report_data['journals_id']
+        report_data = self.find_journals_for_report()
+        journals = report_data['journals']
         columns = report_data['columns']
         part_set = report_data['parts']
         report_table = [
             [subunit.name] + [
-                Journal.objects.get(
-                    pk=journals_id[indxr][indxc]
-                ).get_report_cell(
+                journals[indxr][indxc].get_report_cell(
                     from_event=col.from_event,
                     summary_type=col.column_type,
                     date_to=report_date
-                ) if journals_id[indxr][indxc] else '-'
+                ) if journals[indxr][indxc] else '-'
                 for (indxc, col) in enumerate(columns)
             ]
             for (indxr, subunit) in enumerate(part_set)

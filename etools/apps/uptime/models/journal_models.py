@@ -249,16 +249,16 @@ class Journal(models.Model):
         total = r_set.aggregate(models.Sum('intervals__time_in_state'))['intervals__time_in_state__sum']
         return stat_timedelta_for_report(total)
 
-    def get_journal_or_subjournal_id(self, part_name=None):
+    def get_journal_or_subjournal(self, part_name=None):
         if part_name:
             eq = self.equipment
             try:
                 part = eq.parts.filter(name=part_name)[0]
-                return part.journal.id if part.journal else None
+                return part.journal if part.journal else None
             except IndexError:
                 return None
         else:
-            return self.id
+            return self
 
     def get_report_cell(self, summary_type='ITV',
                         from_event='FVZ', date_to=None):
