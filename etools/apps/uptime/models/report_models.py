@@ -34,6 +34,8 @@ class Report(models.Model):
         part_set = self.equipment.parts.order_by('name').all()
         journals_table = []
         for part in part_set:
+            if part.journal.is_deregister:
+                continue
             journals_table.append([
                 part.journal.get_journal_or_subjournal(
                     col.element_name_filter
@@ -43,7 +45,6 @@ class Report(models.Model):
         return {
             'journals': journals_table,
             'columns': columns,
-            'parts': part_set
         }
 
     def prepare_report_data(self, report_date=None):
@@ -53,20 +54,12 @@ class Report(models.Model):
         report_data = self.find_journals_for_report()
         journals = report_data['journals']
         columns = report_data['columns']
-        part_set = report_data['parts']
-        report_table = [
-            [subunit.name] + [
-                journals[indxr][indxc].get_report_cell(
-                    from_event=col.from_event,
-                    summary_type=col.column_type,
-                    date_to=report_date
-                ) if journals[indxr][indxc] else '-'
-                for (indxc, col) in enumerate(columns)
-            ]
-            for (indxr, subunit) in enumerate(part_set)
-        ]
-        titles = ['Оборудование'] + [col.title for col in columns]
-        report_table = [titles] + report_table
+        report_table = [['Оборудование'] + [col.title for col in columns]]
+        for indxr in range(len(journals)):
+            report_table.append([journals[indxr][0].equipment.name] + [journals[indxr][indxc].get_report_cell(
+                from_event=col.from_event,
+                summary_type=col.column_type,
+                date_to=report_date) if journals[indxr][indxc] else '-' for (indxc, col) in enumerate(columns)])
         return report_table
 
     def get_reports_collection(root_eq):

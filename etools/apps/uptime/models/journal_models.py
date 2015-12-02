@@ -269,47 +269,54 @@ class Journal(models.Model):
             'FSR': 'vsr',
             'FRC': 'vrc',
         }
-        if journal.records.count():
-            try:
-                date_from = self.events.filter(
-                    event_code=from_event_to_event_dict[from_event]
-                ).order_by('-date')[0].date
-                if summary_type == 'DT':
-                    return date_from.strftime("%d.%m.%Y")
-            except IndexError:
-                date_from = None
-                if from_event != 'FVZ':
-                    return '-'
-                elif summary_type == 'DT':
-                    return '-'
-
-            recs = journal.records
-            if date_from:
-                # Время "от события" откатываем на месяц назад, поскольку
-                # капитальный и средный ремонты, замены и реконструкции
-                # длятся не менее месяца, а раньше интервалы фиксировались
-                # за месяц или год, что приводит к неверному расчету
-                recs = recs.filter(rdate__gte=date_from - timedelta(days=31))
-            if date_to:
-                recs = recs.exclude(rdate__gte=date_to)
-            if summary_type == 'PCN':
-                return recs.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
-            elif summary_type == 'OCN':
-                return recs.aggregate(
-                    models.Sum('down_cnt'))['down_cnt__sum']
-            else:
-                return journal.get_stat(
-                    from_date=date_from,
-                    to_date=date_to,
-                    state_code='wrk'
-                )
-        else:
-            if summary_type in ('PCN', 'OCN'):
-                return 0
-            elif summary_type == 'dt':
+        recs = journal.records
+        # if recs.count():
+        try:
+            date_from = self.events.filter(
+                event_code=from_event_to_event_dict[from_event]
+            ).order_by('-date')[0].date
+            if summary_type == 'DT':
+                return date_from.strftime("%d.%m.%Y")
+        except IndexError:
+            date_from = None
+            if from_event != 'FVZ':
                 return '-'
-            else:
-                return '0:00'
+            elif summary_type == 'DT':
+                return '-'
+        if date_from:
+            # Время "от события" откатываем на месяц назад, поскольку
+            # капитальный и средный ремонты, замены и реконструкции
+            # длятся не менее месяца, а раньше интервалы фиксировались
+            # за месяц или год, что приводит к неверному расчету
+            recs = recs.filter(rdate__gte=date_from - timedelta(days=31))
+        if date_to:
+            recs = recs.exclude(rdate__gte=date_to)
+        if summary_type == 'PCN':
+            return recs.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
+        elif summary_type == 'OCN':
+            return recs.aggregate(
+                models.Sum('down_cnt'))['down_cnt__sum']
+        else:
+            return journal.get_stat(
+                from_date=date_from,
+                to_date=date_to,
+                state_code='wrk'
+            )
+        # else:
+        #     if summary_type in ('PCN', 'OCN'):
+        #         return 0
+        #     elif summary_type == 'dt':
+        #         return '-'
+        #     else:
+        #         return '0:00'
+
+    @property
+    def is_deregister(self):
+        ev = self.events.order_by('-date').all()
+        if ev and ev[0].event_code == 'sps':
+            return True
+        else:
+            return False
 
 
 class RecordManager(models.Manager):
