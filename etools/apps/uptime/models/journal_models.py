@@ -1,5 +1,4 @@
-from datetime import timedelta, datetime
-
+from datetime import timedelta, datetime, date
 from django.db import models
 
 from ..constants import EVENT_CHOICES, STATE_CHOICES
@@ -260,17 +259,16 @@ class Journal(models.Model):
         else:
             return self
 
-    def get_report_cell(self, summary_type='ITV',
-                        from_event='FVZ', date_to=None):
-        journal = self.equipment.plant.journal if self.stat_by_parent else self
+    def get_report_cell(self, summary_type='ITV', from_event='FVZ', date_to=None):
         from_event_to_event_dict = {
             'FVZ': 'zmn',
             'FKR': 'vkr',
             'FSR': 'vsr',
             'FRC': 'vrc',
         }
-        recs = journal.records
-        # if recs.count():
+        journal = self.equipment.plant.journal if self.stat_by_parent else self
+        rec_set = journal.records  # Начитаем готовить query_set здесь он еще не выполняется
+        # if rec_set.count():
         try:
             date_from = self.events.filter(
                 event_code=from_event_to_event_dict[from_event]
@@ -284,17 +282,18 @@ class Journal(models.Model):
             elif summary_type == 'DT':
                 return '-'
         if date_from:
-            # Время "от события" откатываем на месяц назад, поскольку
+            # Время "от события" откатываем на начало месяца, поскольку
             # капитальный и средный ремонты, замены и реконструкции
             # длятся не менее месяца, а раньше интервалы фиксировались
             # за месяц или год, что приводит к неверному расчету
-            recs = recs.filter(rdate__gte=date_from - timedelta(days=31))
+            date_from = date(date_from.year, date_from.month, 1)
+            rec_set = rec_set.filter(rdate__gt=date_from)
         if date_to:
-            recs = recs.exclude(rdate__gte=date_to)
+            rec_set = rec_set.exclude(rdate__gte=date_to)
         if summary_type == 'PCN':
-            return recs.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
+            return rec_set.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
         elif summary_type == 'OCN':
-            return recs.aggregate(
+            return rec_set.aggregate(
                 models.Sum('down_cnt'))['down_cnt__sum']
         else:
             return journal.get_stat(
