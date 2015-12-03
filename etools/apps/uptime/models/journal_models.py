@@ -268,7 +268,6 @@ class Journal(models.Model):
         }
         journal = self.equipment.plant.journal if self.stat_by_parent else self
         rec_set = journal.records  # Начитаем готовить query_set здесь он еще не выполняется
-        # if rec_set.count():
         try:
             date_from = self.events.filter(
                 event_code=from_event_to_event_dict[from_event]
@@ -301,13 +300,6 @@ class Journal(models.Model):
                 to_date=date_to,
                 state_code='wrk'
             )
-        # else:
-        #     if summary_type in ('PCN', 'OCN'):
-        #         return 0
-        #     elif summary_type == 'dt':
-        #         return '-'
-        #     else:
-        #         return '0:00'
 
     @property
     def is_deregister(self):

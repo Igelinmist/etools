@@ -30,7 +30,7 @@
         </tr>
         {% for event in event_list %}
             <tr>
-                <td>{{ event.date }}</td>
+                <td>{{ event.date|date:"d.m.Y" }}</td>
                 <td>{{ event.event_code|human_event }}</td>
                 <td>
                     {% if user.is_authenticated and perms.uptime.delete_journal_event %}

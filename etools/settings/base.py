@@ -38,7 +38,6 @@ INSTALLED_APPS = (
 )
 
 PROJECT_APPS = (
-    'debug_toolbar',
     'uptime',
 )
 
