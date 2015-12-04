@@ -62,6 +62,7 @@ etools/settings/production.py
 # collect static output directory
 etools/assets/
 etools/static/
+tools/
 
 .DS_Store
 
