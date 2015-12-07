@@ -72,5 +72,4 @@ node_modules/
 # bower packages
 etools/assets-src/vendor/
 .sass-cache/
-static/
 media/
