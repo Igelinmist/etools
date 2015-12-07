@@ -2,6 +2,8 @@ import sys
 from os.path import join, abspath, dirname
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
+BASE_DIR = dirname(dirname(abspath(__file__)))
+
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
@@ -127,7 +129,7 @@ DATETIME_INPUT_FORMATS = (
 
 LOGIN_URL = '/login/'
 
-STATIC_ROOT = join(PROJECT_ROOT, 'static')
+STATIC_ROOT = join(BASE_DIR, "static/")
 
 # .local.py overrides all the common settings.
 try:
