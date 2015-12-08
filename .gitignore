@@ -72,4 +72,9 @@ node_modules/
 # bower packages
 etools/assets-src/vendor/
 .sass-cache/
+
 media/
+
+# files added for apache
+etools/apache/
+tmp/
