@@ -6,13 +6,17 @@ from ..forms.report_forms import ChooseReportForm
 
 
 def reports(request):
-    root = Equipment.objects.filter(plant=None)[0]
+    try:
+        head_unit = request.user.profile.equipment
+    except AttributeError:
+        head_unit = Equipment.objects.filter(plant=None)[0]
+    head_unit = Equipment.objects.filter(plant=None)[0]
     if request.user.is_authenticated():
         try:
-            root = request.user.profile.equipment
+            head_unit = request.user.profile.equipment
         except AttributeError:
             pass
-    report_choices = Report.get_reports_collection(root)
+    report_choices = Report.get_reports_collection(head_unit)
     form = ChooseReportForm(choices=report_choices)
 
     return render(

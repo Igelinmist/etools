@@ -35,6 +35,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
     'bootstrap3_datetime',
     'widget_tweaks',
 )
@@ -53,6 +55,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
 ROOT_URLCONF = 'etools.urls'
@@ -130,6 +133,10 @@ DATETIME_INPUT_FORMATS = (
 LOGIN_URL = '/login/'
 
 STATIC_ROOT = join(BASE_DIR, "static/")
+
+# for flatpages
+
+SITE_ID = 1
 
 # .local.py overrides all the common settings.
 try:

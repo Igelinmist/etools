@@ -11,8 +11,11 @@ from ..utils import yesterday_local
 
 
 def index(request):
-    root = Equipment.objects.filter(plant=None)[0]
-    context = {'equipment_list': root.unit_tree()}
+    try:
+        head_unit = request.user.profile.equipment
+    except AttributeError:
+        head_unit = Equipment.objects.filter(plant=None)[0]
+    context = {'equipment_list': head_unit.unit_tree()}
     return render(request, 'uptime/index.html', context)
 
 
@@ -91,7 +94,10 @@ def records_on_date(request):
     template_name = 'uptime/records_on_date.html'
     rdate = request.POST.get('rdate', yesterday_local())
     form_date = ChooseRecordsDateForm(initial={'rdate': rdate})
-    head_unit = Equipment.objects.filter(plant=None)[0]
+    try:
+        head_unit = request.user.profile.equipment
+    except AttributeError:
+        head_unit = Equipment.objects.filter(plant=None)[0]
     data_table = head_unit.collect_sub_stat_on_date(rdate)
     for row in data_table:
         if row['form_type'] & DS_FORM:
