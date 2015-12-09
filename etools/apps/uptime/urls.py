@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.contrib.flatpages import views
 
 from .views import journal_views, report_views
 
@@ -30,4 +31,5 @@ urlpatterns = [
     url(r'^reports/viewreport$',
         report_views.report_show,
         name='report_show'),
+    url(r'^info/$', views.flatpage, {'url': '/uptime/info/'}, name='info'),
 ]

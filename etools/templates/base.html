@@ -53,10 +53,13 @@
                   {% if perms.uptime.create_journal_record %}
                   <li><a href="{% url 'uptime:records_on_date' %}">Ввод на дату</a></li>
                   {% endif %}
+                  <li><a href="{% url 'uptime:reports' %}">Отчеты</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li><a href="{% url 'uptime:info' %}">Информация</a></li>
                 </ul>
               </li>
-              <li><a href="{% url 'uptime:reports' %}">Отчеты</a></li>
               <li><a href="/admin/">Администрирование</a></li>
+              <li><a href="/about/">О проекте</a></li>
             </ul>
             {% if user.is_authenticated %}
               <ul class="nav navbar-nav navbar-right">

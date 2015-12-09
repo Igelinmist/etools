@@ -11,5 +11,5 @@ urlpatterns = patterns(
     url(r'^login/$', 'login', {'template_name': 'login.html'}, name='login'),
     url(r'^logout/$', 'logout', name='logout'),
     url(r'^$', views.flatpage, {'url': '/home/'}, name='home'),
-    url(r'^about-us/$', views.flatpage, {'url': '/about-us/'}, name='about'),
+    url(r'^about/$', views.flatpage, {'url': '/about/'}, name='about'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
