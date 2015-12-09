@@ -58,12 +58,18 @@
                   <li><a href="{% url 'uptime:info' %}">Информация</a></li>
                 </ul>
               </li>
-              <li><a href="/admin/">Администрирование</a></li>
+              {% if user.is_authenticated and user.is_superuser%}
+                <li><a href="/admin/">Администрирование</a></li>
+              {% else %}
+                <li><a href="/admin/">Администрирование</a></li>
+              {% endif %}
+              
+
               <li><a href="/about/">О проекте</a></li>
             </ul>
             {% if user.is_authenticated %}
               <ul class="nav navbar-nav navbar-right">
-                <li><a href="{% url 'logout' %}?next=/uptime/" class="btn">Выход {{ user.username }} </a></li>
+                <li><a href="{% url 'logout' %}?next={% url 'home'%}" class="btn">Выход {{ user.username }} </a></li>
               </ul>
             {% else %}
               <form method="POST" action="{% url 'login' %}" class="navbar-form navbar-right">
