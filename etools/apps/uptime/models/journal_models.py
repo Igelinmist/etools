@@ -39,7 +39,10 @@ class Equipment(models.Model):
     @property
     def journal_id(self):
         if '_journal_cache' in self.__dict__:
-            return self._journal_cache.id
+            if self._journal_cache:
+                return self._journal_cache.id
+            else:
+                return None
         else:
             return None
 

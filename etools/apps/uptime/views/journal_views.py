@@ -11,10 +11,12 @@ from ..utils import yesterday_local
 
 
 def index(request):
-    try:
-        head_unit = request.user.profile.equipment
-    except AttributeError:
-        head_unit = Equipment.objects.filter(plant=None)[0]
+    head_unit = Equipment.objects.filter(plant=None)[0]
+    if request.user.is_authenticated():
+        try:
+            head_unit = request.user.profile.equipment
+        except AttributeError:
+            pass
     context = {'equipment_list': head_unit.unit_tree()}
     return render(request, 'uptime/index.html', context)
 
