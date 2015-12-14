@@ -4,6 +4,7 @@ from django.db import models
 from ..constants import EVENT_CHOICES, STATE_CHOICES
 from ..constants import RECORD_SET, INTERVAL_SET, B_FORM, DS_FORM, HR_FORM
 from ..utils import req_date, stat_timedelta_for_report
+from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, HotReservRecordForm
 
 
 class EquipmentManager(models.Manager):
@@ -311,6 +312,14 @@ class Journal(models.Model):
             return True
         else:
             return False
+
+    def recordFormClass(self):
+        if self.downtime_stat:
+            return DownStatRecordForm
+        elif self.hot_rzv_stat:
+            return HotReservRecordForm
+        else:
+            return BaseRecordForm
 
 
 class RecordManager(models.Manager):

@@ -2,7 +2,7 @@
 
 {% block content %}
     <h2>Редактирование записи журнала статистики работы для <strong>{{ journal.equipment.name }}</strong></h2>
-    <form action="{% url 'uptime:record_edit' journal.id record_id%}" method="post" class="form-inline" role="form">{% csrf_token %}
+    <form action="{% url 'uptime:record_edit' journal.id record_id%}" method="post" class="form-horizontal" role="form">{% csrf_token %}
         <!-- Общая часть формы для создания и редактирования записи -->
         {% include "uptime/partials/_record_form.html" %}
     </form>

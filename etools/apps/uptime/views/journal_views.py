@@ -4,10 +4,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import permission_required
 
 from ..models.journal_models import Equipment, Journal, EventItem
-from ..forms.base_forms import RecordForm
 from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, ChooseRecordsDateForm, EventForm
 from ..constants import B_FORM, DS_FORM
-from ..utils import yesterday_local
+from ..utils import yesterday_local, custom_redirect
 
 
 def index(request):
@@ -39,7 +38,9 @@ def show(request, journal_id):
                      login_url='login')
 def record_new(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
-    form = RecordForm(request.POST or None, extended_stat=journal.downtime_stat)
+    rdate = request.GET.get('rdate', yesterday_local())
+    formClass = journal.recordFormClass()
+    form = formClass(request.POST or None, is_individual=True, initial={'rdate': rdate})
     if request.POST and form.is_valid():
         journal.write_record(**form.cleaned_data)
         if request.POST['submit'] == 'af':
@@ -49,11 +50,7 @@ def record_new(request, journal_id):
             if rec:
                 return redirect('uptime:record_edit', journal_id=journal.id, record_id=rec.id)
             else:
-                form = RecordForm(None, extended_stat=journal.downtime_stat, initial={'rdate': rdate})
-                return render(
-                    request,
-                    'uptime/record_new.html',
-                    {'form': form, 'journal': journal})
+                return custom_redirect('uptime:record_new', journal.id, rdate=rdate)
     return render(request, 'uptime/record_new.html', {'form': form, 'journal': journal})
 
 
@@ -61,7 +58,8 @@ def record_new(request, journal_id):
                      login_url='login')
 def record_edit(request, journal_id, record_id):
     journal = get_object_or_404(Journal, pk=journal_id)
-    form = RecordForm(request.POST or journal.get_record_data(record_id), extended_stat=journal.downtime_stat)
+    formClass = journal.recordFormClass()
+    form = formClass(request.POST or journal.get_record_data(record_id), is_individual=True)
     if request.POST and form.is_valid():
         journal.write_record(**form.cleaned_data)
         if request.POST['submit'] == 'af':
@@ -71,11 +69,7 @@ def record_edit(request, journal_id, record_id):
             if rec:
                 return redirect('uptime:record_edit', journal_id=journal.id, record_id=rec.id)
             else:
-                form = RecordForm(None, extended_stat=journal.downtime_stat, initial={'rdate': rdate})
-                return render(
-                    request,
-                    'uptime/record_new.html',
-                    {'form': form, 'journal': journal})
+                return custom_redirect('uptime:record_new', journal.id, rdate=rdate)
     return render(request, 'uptime/record_edit.html', {'form': form, 'journal': journal, 'record_id': record_id})
 
 

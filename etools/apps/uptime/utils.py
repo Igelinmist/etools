@@ -35,3 +35,12 @@ def stat_timedelta_for_report(time_delta):
         return str(int(hours))
     else:
         return '-'
+
+
+def custom_redirect(url_name, *args, **kwargs):
+    from django.core.urlresolvers import reverse
+    from django.http import HttpResponseRedirect
+    from django.utils.http import urlencode
+    url = reverse(url_name, args=args)
+    params = urlencode(kwargs)
+    return HttpResponseRedirect(url + "?%s" % params)

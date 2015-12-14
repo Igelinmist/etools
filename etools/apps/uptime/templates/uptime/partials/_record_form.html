@@ -3,66 +3,9 @@
 {% block head_ext %}
     {{ form.media }}
 {% endblock head_ext %}
-
 <div class="row">
-    <div class="form-group col-md-12">
-        {{ form.rdate.errors }}
-        <label class="control-label col-md-3" for="{{ form.rdate.id_for_label }}">Дата:</label>
-        {% render_field form.rdate class+="form-control" %}
-    </div>
-    <div class="form-group col-md-12">
-        {{ form.wrk.errors }}
-        <label class="control-label col-md-3" for="{{ form.wrk.id_for_label }}">Работа:</label>
-        {% render_field form.wrk class+="form-control" %}
-        <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-    </div>
-    {% if journal.downtime_stat %}
-        <div class="form-group col-md-12">
-            {{ form.rsv.errors }}
-            <label class="control-label col-md-3" for="{{ form.rsv.id_for_label }}">Резерв:</label>
-            {% render_field form.rsv class+="form-control" %}
-            <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-        </div>
-        <div class="form-group col-md-12">
-            {{ form.arm.errors }}
-            <label class="control-label col-md-3" for="{{ form.arm.id_for_label }}">Аварийный ремонт:</label>
-            {% render_field form.arm class+="form-control" %}
-            <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-        </div>
-        <div class="form-group col-md-12">
-            {{ form.trm.errors }}
-            <label class="control-label col-md-3" for="{{ form.trm.id_for_label }}">Текущий ремонт:</label>
-            {% render_field form.trm class+="form-control" %}
-            <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-        </div>
-        <div class="form-group col-md-12">
-            {{ form.krm.errors }}
-            <label class="control-label col-md-3" for="{{ form.krm.id_for_label }}">Капитальный ремонт:</label>
-            {% render_field form.krm class+="form-control" %}
-            <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-        </div>
-        <div class="form-group col-md-12">
-            {{ form.srm.errors }}
-            <label class="control-label col-md-3" for="{{ form.srm.id_for_label }}">Средний ремонт:</label>
-            {% render_field form.srm class+="form-control" %}
-            <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-        </div>
-        <div class="form-group col-md-12">
-            {{ form.rcd.errors }}
-            <label class="control-label col-md-3" for="{{ form.rcd.id_for_label }}">Реконструкция:</label>
-            {% render_field form.rcd class+="form-control" %}
-            <button type="button" class="bnt btn-primary easy-input">&lt; 24:00</button>
-        </div>
-    {% endif %}
-    <div class="form-group col-md-12">
-        {{ form.up_cnt.errors }}
-        <label class="control-label col-md-3" for="{{ form.up_cnt.id_for_label }}">Число пусков:</label>
-        {% render_field form.up_cnt class+="form-control" %}
-    </div>
-    <div class="form-group col-md-12">
-        {{ form.down_cnt.errors }}
-        <label class="control-label col-md-3" for="{{ form.down_cnt.id_for_label }}">Число остановов:</label>
-        {% render_field form.down_cnt class+="form-control" %}
+    <div class="col-md-offset-2 col-md-6">
+        <table>{{ form }}</table>
     </div>
     <div class="form-group col-md-6">
         <button type="submit" value="-1" name="submit" class="btn btn-default col-md-4">&#9668; записать </button>
@@ -74,9 +17,10 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('.easy-input').bind('click', function(e) {
+        $(".interval").bind("dblclick", function(e) {
             e.preventDefault();
-            $(this).prev().val('24:00');
+            $(this).val("24:00");
+            $(this).trigger("change")
         });
     })
 </script>
