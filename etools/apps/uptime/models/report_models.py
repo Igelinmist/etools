@@ -113,7 +113,8 @@ class Report(models.Model):
                 (self,
                  self.prepare_report_data(report_date=qdate))
             )
-        return report_list
+        sorted_report_list = sorted(report_list, key=lambda k: k[0].weight)
+        return sorted_report_list
 
 
 TYPE_CHOICES = (
