@@ -29,13 +29,12 @@
           {% csrf_token %}
           <input type="hidden" name="journal_id" value="{{data_row.journal_id}}">
           {{data_row.form_content}}
-          <input type="submit" value="Записать" 
-            {% if data_row.has_record %}
-              class="apply-btn hidden" 
-            {% else %}
-              class="apply-btn"
-            {% endif %}
-          >
+          {% if data_row.has_record %}
+            <input type="hidden" class="has_record" value="1" />
+          {% else %}
+            <input type="hidden" class="has_record" value="0" />
+          {% endif %} 
+          <input type="submit" value="Записать" class="apply-btn">
           </form>
           </div>
       {% else %}
@@ -46,29 +45,34 @@
 {% endblock content %}
 
 {% block javascript %}
-  <script type="text/javascript">
-    $(document).ready(function() {
-      $(".record-form").submit(function(event) {
-        event.preventDefault();
-        $.ajax({
-          data: $(this).serialize(),
-          type: $(this).attr("method"),
-          url: $(this).attr("action"),
-          success: function(data) {
-            $("#record-form-"+data.journal_id).css("color", "gray");
-            $("#record-form-"+data.journal_id).find(".apply-btn").hide();
-          }
-        });
-        return false;
+<script type="text/javascript">
+  $(document).ready(function() {
+    $(".record-form").submit(function(e) {
+      e.preventDefault();
+      $.ajax({
+        data: $(this).serialize(),
+        type: $(this).attr("method"),
+        url: $(this).attr("action"),
+        success: function(data) {
+          $("#record-form-"+data.journal_id).css("color", "gray");
+          $("#record-form-"+data.journal_id).find(".apply-btn").hide();
+        }
       });
-        $(".interval").bind("dblclick", function(e) {
-          e.preventDefault();
-          $(this).val("24:00");
-          $(this).trigger("change")
-        });
-        $("input").change(function() {
-          $(this).parent().find(".apply-btn").show();
-        });
+      return false;
     });
-  </script>
+    $(".has_record").filter(function() {
+      return this.getAttribute("value") == "1";
+    }).parent().find(".apply-btn").hide();
+    $(".interval").bind("dblclick", function(e) {
+      e.preventDefault();
+      $(this).val("24:00");
+      $(this).parent().find(".apply-btn").show();
+      $(this).trigger("change");
+    });
+    $("input").bind("change", function(e) {
+      e.preventDefault();
+      $(this).parent().find(".apply-btn").show();
+    });
+  });
+</script>
 {% endblock javascript %}
