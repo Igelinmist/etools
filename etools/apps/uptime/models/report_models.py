@@ -1,6 +1,6 @@
 from django.db import models
 
-from .journal_models import Equipment, Journal
+from .journal_models import Equipment
 
 
 class Report(models.Model):

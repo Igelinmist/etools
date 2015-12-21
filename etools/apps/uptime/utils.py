@@ -17,7 +17,11 @@ def req_timedelta(arg):
     else:
         if isinstance(arg, str):
             parts = arg.split(':')
-            return timedelta(hours=int(parts[0]), minutes=int(parts[1]))
+            try:
+                res = timedelta(hours=int(parts[0]), minutes=int(parts[1]))
+            except ValueError:
+                res = timedelta(0)
+            return res
         else:
             return timedelta(0)
 
