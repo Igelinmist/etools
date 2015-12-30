@@ -7,6 +7,7 @@ from django.contrib.flatpages import views
 urlpatterns = patterns(
     'django.contrib.auth.views',
     url(r'^uptime/', include('uptime.urls', namespace="uptime")),
+    url(r'^pcs/', include('pcs.urls', namespace="pcs")),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^login/$', 'login', {'template_name': 'login.html'}, name='login'),
     url(r'^logout/$', 'logout', name='logout'),

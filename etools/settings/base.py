@@ -43,6 +43,7 @@ INSTALLED_APPS = (
 
 PROJECT_APPS = (
     'uptime',
+    'pcs',
 )
 
 INSTALLED_APPS += PROJECT_APPS
