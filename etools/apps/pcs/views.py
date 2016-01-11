@@ -1,9 +1,9 @@
 from django.shortcuts import render
 
-from .models import Params
+from .models import Param
 
 
 def index(request):
-    params = Params.objects.all()
+    params = Param.objects.all()
     context = {'params': params}
     return render(request, 'pcs/index.html', context)
