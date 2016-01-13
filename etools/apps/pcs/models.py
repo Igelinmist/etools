@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.loading import cache
 
 from datetime import date
 
@@ -6,24 +7,7 @@ from datetime import date
 class HistoryDataManager(models.Manager):
 
     def get_queryset(self):
-        return super(HistoryDataManager, self).get_queryset().using('fdata').order_by('dttm').only('dttm', 'value')
-
-
-class Hist(models.Model):
-    dttm = models.DateTimeField(primary_key=True)
-    ss = models.SmallIntegerField(primary_key=True)
-    prmnum = models.IntegerField(primary_key=True)
-    value = models.FloatField()
-    sw = models.SmallIntegerField(blank=True, null=True)
-
-    objects = HistoryDataManager()
-
-    class Meta:
-        managed = False
-        unique_together = (('dttm', 'ss', 'prmnum'),)
-
-    def __str__(self):
-        return '{0} > {1}'.format(self.dttm, self.value)
+        return super(HistoryDataManager, self).get_queryset().using('fdata').order_by('dttm')
 
 
 class ParamsManager(models.Manager):
@@ -52,14 +36,61 @@ class Param(models.Model):
         managed = False
         db_table = 'params'
 
+    @property
+    def model_name(self):
+        return 'histmodel_' + self.ms_accronim.lower()
+
+    @property
+    def tbl_name(self):
+        return 'hist_' + self.ms_accronim.lower()
+
+    @property
+    def histmodel(self):
+        if hasattr(self, '_histmodel'):
+            return self._histmodel
+        else:
+            if self.model_name in cache.all_models['pcs']:
+                self.histmodel = cache.all_models['pcs'][self.model_name]
+            else:
+                # создаем модель
+                class Meta:
+                    managed = False
+                    db_table = self.tbl_name
+                attrs = {
+                    'dttm': models.DateTimeField(primary_key=True),
+                    'ss': models.SmallIntegerField(primary_key=True),
+                    'prmnum': models.IntegerField(primary_key=True),
+                    'value': models.FloatField(),
+                    'sw': models.SmallIntegerField(blank=True, null=True),
+                    'objects': HistoryDataManager(),
+                    '__module__': 'pcs.models',
+                    'Meta': Meta,
+                }
+                self.histmodel = type(
+                    self.model_name,
+                    (models.Model, ),
+                    attrs
+                )
+        return self._histmodel
+
+    @histmodel.setter
+    def histmodel(self, value):
+        self._histmodel = value
+
     def getHistDataSet(self, dttm_from=None, dttm_to=None):
-        Hist._meta.db_table = 'hist_' + self.ms_accronim.lower()
-        q_set = Hist.objects
+        q_set = self.histmodel.objects
         if dttm_from:
             q_set = q_set.filter(dttm__gte=dttm_from)
         else:
             q_set = q_set.filter(dttm__gte=date.today())
         if dttm_to:
             q_set = q_set.exclude(dttm__gte=dttm_to)
-        q_set = q_set.filter(prmnum=self.prmnum)
+        q_set = q_set.filter(prmnum=self.prmnum, ss=0)
         return q_set.all()
+
+'''
+from pcs.models import Param
+p1, p2 = Param.objects.all()[0:2]
+d1 = p1.getHistDataSet()
+d2 = p2.getHistDataSet()
+'''
