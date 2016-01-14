@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from django.db import models
 from django.db.models.loading import cache
 
@@ -77,7 +79,7 @@ class Param(models.Model):
     def histmodel(self, value):
         self._histmodel = value
 
-    def getHistDataSet(self, dttm_from=None, dttm_to=None):
+    def _histDataSet(self, dttm_from, dttm_to):
         q_set = self.histmodel.objects
         if dttm_from:
             q_set = q_set.filter(dttm__gte=dttm_from)
@@ -88,9 +90,8 @@ class Param(models.Model):
         q_set = q_set.filter(prmnum=self.prmnum, ss=0)
         return q_set.all()
 
-'''
-from pcs.models import Param
-p1, p2 = Param.objects.all()[0:2]
-d1 = p1.getHistDataSet()
-d2 = p2.getHistDataSet()
-'''
+    def getHistData(self, dttm_from=None, dttm_to=None):
+        Hist = namedtuple('Hist', ['d', 'v'])
+        d_set = self._histDataSet(dttm_from, dttm_to)
+        return {'param': self.prmnum,
+                'data': [Hist(item.dttm, item.value) for item in d_set]}
