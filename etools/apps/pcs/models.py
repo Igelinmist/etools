@@ -3,7 +3,10 @@ from collections import namedtuple
 from django.db import models
 from django.db.models.loading import cache
 
-from datetime import date
+from datetime import date, timedelta, datetime
+
+from .utils import yesterday
+from .constants import PERMISSIBLE_PREC
 
 
 class HistoryDataManager(models.Manager):
@@ -16,6 +19,8 @@ class ParamsManager(models.Manager):
 
     def get_queryset(self):
         return super(ParamsManager, self).get_queryset().using('fdata')
+
+Hist = namedtuple('Hist', ['dt', 'v'])
 
 
 class Param(models.Model):
@@ -79,7 +84,7 @@ class Param(models.Model):
     def histmodel(self, value):
         self._histmodel = value
 
-    def _histDataSet(self, dttm_from, dttm_to):
+    def _hist_data_set(self, dttm_from, dttm_to):
         q_set = self.histmodel.objects
         if dttm_from:
             q_set = q_set.filter(dttm__gte=dttm_from)
@@ -90,8 +95,53 @@ class Param(models.Model):
         q_set = q_set.filter(prmnum=self.prmnum, ss=0)
         return q_set.all()
 
-    def getHistData(self, dttm_from=None, dttm_to=None):
-        Hist = namedtuple('Hist', ['d', 'v'])
-        d_set = self._histDataSet(dttm_from, dttm_to)
-        return {'param': self.prmnum,
-                'data': [Hist(item.dttm, item.value) for item in d_set]}
+    def get_hist_data(self, dttm_from=None, dttm_to=None):
+
+        def _get_hr_dist(dttm):
+            """
+            function calculate time-distance to closest hour start
+            """
+            if dttm.minute < 30:
+                res = timedelta(minutes=dttm.minute, seconds=dttm.second)
+            else:
+                res = timedelta(hours=1) - timedelta(minutes=dttm.minute, seconds=dttm.second)
+            return res
+
+        def _round_hr(dttm):
+            if dttm.minute < 30:
+                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0)
+            else:
+                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0) + timedelta(hours=1)
+
+        d_set = self._hist_data_set(dttm_from, dttm_to)
+        res = {'prm_num': self.prmnum,
+               'prm_name': self.prmname, }
+
+        res['data'] = []
+        res['ctrl_h'] = {}
+        previous_mes = {}
+        for item in d_set:
+            if not (PERMISSIBLE_PREC < item.dttm.minute < (60 - PERMISSIBLE_PREC)):
+                # замеры подходят для привязки к часу
+                # нужно выделить наиболее близкое значение к началу часа
+                ctrl_hour = _round_hr(item.dttm)
+                if previous_mes:
+                    if previous_mes['appr'] > _get_hr_dist(item.dttm):
+                        # все еще приближаемся к началу часа
+                        previous_mes['mes'] = (item.dttm, item.value)
+                        previous_mes['appr'] = _get_hr_dist(item.dttm)
+                        # заменяем значение замера в начале часа
+                        res['ctrl_h'][ctrl_hour] = Hist(item.dttm, item.value)
+                    else:
+                        # начали удаляться
+                        # сбрасываем previous_mes
+                        previous_mes = {}
+                else:
+                    # предыдущего замера не было
+                    previous_mes['mes'] = (item.dttm, item.value)
+                    previous_mes['appr'] = _get_hr_dist(item.dttm)
+                    # заменяем значение замера в начале часа
+                    res['ctrl_h'][ctrl_hour] = Hist(item.dttm, item.value)
+            res['data'].append(Hist(item.dttm, item.value))
+
+        return res
