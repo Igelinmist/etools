@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from .models import Param
+from .models.extern_data_models import Param
 
 
 def index(request):

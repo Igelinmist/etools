@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models.report_models import Report, Band
+
+admin.site.register(Report)
+admin.site.register(Band)
