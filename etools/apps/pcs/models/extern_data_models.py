@@ -43,6 +43,9 @@ class Param(models.Model):
         managed = False
         db_table = 'params'
 
+    def __str__(self):
+        return "%s [%s:%s]" % (self.prmname, self.ms_accronim, self.prmnum)
+
     @property
     def model_name(self):
         return 'histmodel_' + self.ms_accronim.lower()

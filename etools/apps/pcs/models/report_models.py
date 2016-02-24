@@ -20,6 +20,9 @@ class Report(models.Model):
         verbose_name_plural = 'отчеты'
         ordering = ['weight']
 
+    def __str__(self):
+        return self.title
+
 
 class Band(models.Model):
     """
@@ -39,3 +42,6 @@ class Band(models.Model):
         verbose_name_plural = 'ленты'
         ordering = ['weight']
         default_permissions = []
+
+    def __str__(self):
+        return "[%s] %s" % (self.param_num, self.name)
