@@ -1,6 +1,9 @@
 from django import forms
 
+from bootstrap3_datetime.widgets import DateTimePicker
+
 from .models.extern_data_models import Param
+from .models.report_models import Report
 from .models.report_models import Band
 
 
@@ -11,3 +14,22 @@ class BandForm(forms.ModelForm):
     class Meta:
         model = Band
         exclude = []
+
+
+class ChooseReportForm(forms.Form):
+    report = forms.ModelChoiceField(
+        widget=forms.widgets.RadioSelect(),
+        queryset=Report.objects.all(),
+        empty_label='',
+        label='Отчет',
+    )
+    dt_from = forms.DateTimeField(
+        widget=DateTimePicker(options={"locale": "ru",
+                                       "pickTime": True}),
+        label='Начало отчета:',
+    )
+    dt_to = forms.DateTimeField(
+        widget=DateTimePicker(options={"locale": "ru",
+                                       "pickTime": True}),
+        label='Конец отчета:',
+    )

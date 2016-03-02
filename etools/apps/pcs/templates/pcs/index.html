@@ -1,6 +1,12 @@
-<h3>It's index page for PCS</h3>
-<ul>
-    {% for prm in params %}
-        <li>{{ prm.prmname }} = {{ prm.last_value }} {{ prm.mesunit }}</li>
-    {% endfor %}
-</ul>
+{% extends "base.html" %}
+
+{% load staticfiles%}
+
+{% block content %}
+    <h3>It's index page for PCS</h3>
+    <ul>
+        {% for prm in params %}
+            <li>{{ prm.prmname }} = {{ prm.last_value }} {{ prm.mesunit }}</li>
+        {% endfor %}
+    </ul>
+{% endblock content %}

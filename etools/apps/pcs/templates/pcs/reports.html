@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load staticfiles%}
+
+{% block head_ext %}
+{{ form.media }}
+{% endblock head_ext %}
+{% block content %}
+<form action="{% url 'pcs:report_show' %}" method="get" role="form" class="form-inline">
+    {{ form }}
+    <input type="submit" value="Сформировать" class="btn btn-default" />
+</form>
+{% endblock content %}
