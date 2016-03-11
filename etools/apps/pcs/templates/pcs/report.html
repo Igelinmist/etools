@@ -1,3 +1,22 @@
-<h2>Отчет технологических данных</h2>
-{{ title }}
-{{ tbl }}
+{% extends "base.html" %}
+{% block content %}
+    <h2>Отчет технологических данных</h2>
+    <h3>{{ title }}</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th> </th>
+                {% for t in tbl.rtitles %}
+                    <th>{{ t|date:"d.m H:i" }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in tbl.content %}
+                <tr>
+                    {% for cel in row %}
+                        <td>{{ cel }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock content %}

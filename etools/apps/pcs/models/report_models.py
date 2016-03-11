@@ -70,7 +70,7 @@ class Band(models.Model):
         on_delete=models.CASCADE
     )
     param_num = models.IntegerField()
-    name = models.CharField(max_length=15)
+    name = models.CharField(max_length=50)
     weight = models.IntegerField(default=0)
 
     class Meta:
