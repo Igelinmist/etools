@@ -20,7 +20,10 @@ def report_show(request):
     report_id = request.GET['report']
     if report_id:
         report = get_object_or_404(Report, pk=request.GET['report'])
-        context = {'report_id': report.id}
+        context = {
+            'title': report.title,
+            'tbl': report.prepare(request.GET['dt_from'], request.GET['dt_to'])
+        }
         return render(request, 'pcs/report.html', context)
     else:
         return redirect('pcs:reports')

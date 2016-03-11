@@ -1,4 +1,7 @@
 from django.db import models
+from datetime import datetime, timedelta
+
+from .extern_data_models import Param
 
 
 REPORT_TYPES = (
@@ -22,6 +25,39 @@ class Report(models.Model):
 
     def __str__(self):
         return self.title
+
+    def prepare(self, dtfrom_str, dtto_str):
+        """
+        Prepare content of Report
+        """
+        # Calculate time_row
+        dtfrom = datetime.strptime(dtfrom_str, "%d.%m.%Y %H:%M")
+        dtto = datetime.strptime(dtto_str, "%d.%m.%Y %H:%M")
+        res = {
+            'rtitles': [],
+            'content': [],
+        }
+        if dtfrom > dtto:
+            return res
+        else:
+            dttemp = datetime(dtfrom.year, dtfrom.month, dtfrom.day, dtfrom.hour)
+            if dttemp == dtfrom:
+                res['rtitles'].append(dttemp)
+            while dttemp <= dtto:
+                dttemp += timedelta(hours=1)
+                if dttemp <= dtto:
+                    res['rtitles'].append(dttemp)
+        for band in self.bands.all():
+            prm = Param.objects.get(pk=band.param_num)
+            hist_data = prm.get_hist_data(dtfrom, dtto)
+            hrow = []
+            for tm in res['rtitles']:
+                tv = hist_data['ctrl_h'].get(tm, '-')
+                if tv != '-':
+                    tv = tv.v
+                hrow.append(tv)
+            res['content'].append([band.name, ] + hrow)
+        return res
 
 
 class Band(models.Model):

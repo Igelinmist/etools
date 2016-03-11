@@ -120,8 +120,8 @@ class Param(models.Model):
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname, }
 
-        res['data'] = []
-        res['ctrl_h'] = {}
+        res['data'] = []  #  all the data returned by query
+        res['ctrl_h'] = {}  #  the data on the edge of hour
         previous_mes = {}
         for item in d_set:
             if not (PERMISSIBLE_PREC < item.dttm.minute < (60 - PERMISSIBLE_PREC)):
