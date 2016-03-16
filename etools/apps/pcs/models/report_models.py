@@ -14,9 +14,9 @@ class Report(models.Model):
     """
     Description: Class Report - representation of technological data
     """
-    title = models.CharField(max_length=100)
-    weight = models.IntegerField(default=0)
-    rtype = models.CharField(max_length=3, choices=REPORT_TYPES)
+    title = models.CharField(max_length=100, verbose_name='Заголовок')
+    weight = models.IntegerField(default=0, verbose_name='Вес')
+    rtype = models.CharField(max_length=3, choices=REPORT_TYPES, verbose_name='Тип отчета')
 
     class Meta:
         verbose_name = 'отчет'
@@ -70,8 +70,8 @@ class Band(models.Model):
         on_delete=models.CASCADE
     )
     param_num = models.IntegerField()
-    name = models.CharField(max_length=50)
-    weight = models.IntegerField(default=0)
+    name = models.CharField(max_length=50, verbose_name='Имя для отчета')
+    weight = models.IntegerField(default=0, verbose_name='Вес')
 
     class Meta:
         verbose_name = 'лента'

@@ -42,6 +42,7 @@ class Param(models.Model):
     class Meta:
         managed = False
         db_table = 'params'
+        ordering = ('prmnum', )
 
     def __str__(self):
         return "%s [%s:%s]" % (self.prmname, self.ms_accronim, self.prmnum)

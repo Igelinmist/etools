@@ -11,6 +11,10 @@ class BandInline(admin.TabularInline):
     model = Band
     form = BandForm
     extra = 1
+    fieldsets = [(None, {'fields': ["param_set", "param_num", "name", "weight"]}), ]
+
+    class Media:
+        js = ("js/band_scripts.js",)
 
 
 class ReportAdmin(admin.ModelAdmin):
