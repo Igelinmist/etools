@@ -1,15 +1,14 @@
-# from collections import namedtuple
+from collections import namedtuple
+from datetime import date, timedelta, datetime
 
 import psycopg2
 from django.db import models
-# from django.db.models.loading import cache
-
-# from datetime import date, timedelta, datetime
-
 from django.conf import settings
 
+from ..constants import PERMISSIBLE_PREC
 
-# from ..constants import PERMISSIBLE_PREC
+
+Hist = namedtuple('Hist', ['dt', 'v'])
 
 
 class PCS():
@@ -35,6 +34,17 @@ class PCS():
         self.cur.execute('SELECT * FROM params;')
         return self.cur.fetchall()
 
+    def _hist_data_set(self, hist_tbl, prmnum, dttm_from, dttm_to):
+        """ Auxiliary method for getting historical data. """
+
+        sql_str = """SELECT dttm, value
+                     FROM %s
+                     WHERE prmnum = %s AND dttm BETWEEN \'%s\' AND \'%s\'
+                     ORDER BY dttm;""" % (hist_tbl, prmnum, dttm_from, dttm_to)
+        self.cur.execute(sql_str)
+
+        return self.cur.fetchall()
+
 pcs_source = PCS(
     db_host=settings.PCS_DATABASE['HOST'],
     db_port=settings.PCS_DATABASE['PORT'],
@@ -58,6 +68,9 @@ class Param(models.Model):
         db_table = 'params'
         ordering = ('prmnum',)
 
+    def __str__(self):
+        return "%s [%s:%s]" % (self.prmname, self.ms_accronim, self.prmnum)
+
     def load_params():
         pcs_source.open()
         dataset = pcs_source.get_params()
@@ -65,101 +78,7 @@ class Param(models.Model):
         Param.objects.bulk_create(prm_list)
         pcs_source.close()
 
-
-"""
-
-class HistoryDataManager(models.Manager):
-
-    def get_queryset(self):
-        return super(HistoryDataManager, self).get_queryset().using('fdata').order_by('dttm')
-
-
-class ParamsManager(models.Manager):
-
-    def get_queryset(self):
-        return super(ParamsManager, self).get_queryset().using('fdata').order_by('prmnum')
-
-Hist = namedtuple('Hist', ['dt', 'v'])
-
-
-class Param(models.Model):
-    prmnum = models.IntegerField(primary_key=True)
-    ms_accronim = models.CharField(max_length=15)
-    prmname = models.CharField(max_length=70)
-    last_value = models.FloatField(blank=True, null=True)
-    last_timestamp = models.DateTimeField(blank=True, null=True)
-    last_sw = models.SmallIntegerField(blank=True, null=True)
-    rpt_cnt = models.IntegerField(blank=True, null=True)
-    summer_shift = models.SmallIntegerField(blank=True, null=True)
-    mesunit = models.CharField(max_length=10, blank=True, null=True)
-    prm_abbr = models.CharField(max_length=50, blank=True, null=True)
-    inv = models.SmallIntegerField(blank=True, null=True)
-    is_accum_value = models.SmallIntegerField(blank=True, null=True)
-
-    objects = ParamsManager()
-    params = ParamsManager()
-
-    class Meta:
-        managed = False
-        db_table = 'params'
-        ordering = ('prmnum', )
-
-    def __str__(self):
-        return "%s [%s:%s]" % (self.prmname, self.ms_accronim, self.prmnum)
-
-    @property
-    def model_name(self):
-        return 'histmodel_' + self.ms_accronim.lower()
-
-    @property
-    def tbl_name(self):
-        return 'hist_' + self.ms_accronim.lower()
-
-    @property
-    def histmodel(self):
-        if hasattr(self, '_histmodel'):
-            return self._histmodel
-        else:
-            if self.model_name in cache.all_models['pcs']:
-                self.histmodel = cache.all_models['pcs'][self.model_name]
-            else:
-                # создаем модель
-                class Meta:
-                    managed = False
-                    db_table = self.tbl_name
-                attrs = {
-                    'dttm': models.DateTimeField(primary_key=True),
-                    'ss': models.SmallIntegerField(primary_key=True),
-                    'prmnum': models.IntegerField(primary_key=True),
-                    'value': models.FloatField(),
-                    'sw': models.SmallIntegerField(blank=True, null=True),
-                    'objects': HistoryDataManager(),
-                    '__module__': 'pcs.models',
-                    'Meta': Meta,
-                }
-                self.histmodel = type(
-                    self.model_name,
-                    (models.Model, ),
-                    attrs
-                )
-        return self._histmodel
-
-    @histmodel.setter
-    def histmodel(self, value):
-        self._histmodel = value
-
-    def _hist_data_set(self, dttm_from, dttm_to):
-        q_set = self.histmodel.objects
-        if dttm_from:
-            q_set = q_set.filter(dttm__gte=dttm_from)
-        else:
-            q_set = q_set.filter(dttm__gte=date.today())
-        if dttm_to:
-            q_set = q_set.exclude(dttm__gte=dttm_to)
-        q_set = q_set.filter(prmnum=self.prmnum, ss=0)
-        return q_set.all()
-
-    def get_hist_data(self, dttm_from=None, dttm_to=None):
+    def get_hist_data(self, dttm_from=date.today() - timedelta(1), dttm_to=date.today()):
 
         def _get_hr_dist(dttm):
             if dttm.minute < 30:
@@ -174,36 +93,38 @@ class Param(models.Model):
             else:
                 return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0) + timedelta(hours=1)
 
-        d_set = self._hist_data_set(dttm_from, dttm_to)
+        pcs_source.open()
+        d_set = pcs_source._hist_data_set('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
+
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname, }
-
-        res['data'] = []  #  all the data returned by query
-        res['ctrl_h'] = {}  #  the data on the edge of hour
+        # all the data returned by query
+        res['data'] = []
+        # the data on the edge of hour
+        res['ctrl_h'] = {}
         previous_mes = {}
         for item in d_set:
-            if not (PERMISSIBLE_PREC < item.dttm.minute < (60 - PERMISSIBLE_PREC)):
+            if not (PERMISSIBLE_PREC < item[0].minute < (60 - PERMISSIBLE_PREC)):
                 # замеры подходят для привязки к часу
                 # нужно выделить наиболее близкое значение к началу часа
-                ctrl_hour = _round_hr(item.dttm)
+                ctrl_hour = _round_hr(item[0])
                 if previous_mes:
-                    if previous_mes['appr'] > _get_hr_dist(item.dttm):
+                    if previous_mes['appr'] > _get_hr_dist(item[0]):
                         # все еще приближаемся к началу часа
-                        previous_mes['mes'] = (item.dttm, item.value)
-                        previous_mes['appr'] = _get_hr_dist(item.dttm)
+                        previous_mes['mes'] = (item[0], item[1])
+                        previous_mes['appr'] = _get_hr_dist(item[0])
                         # заменяем значение замера в начале часа
-                        res['ctrl_h'][ctrl_hour] = Hist(item.dttm, item.value)
+                        res['ctrl_h'][ctrl_hour] = Hist(item[0], item[1])
                     else:
                         # начали удаляться
                         # сбрасываем previous_mes
                         previous_mes = {}
                 else:
                     # предыдущего замера не было
-                    previous_mes['mes'] = (item.dttm, item.value)
-                    previous_mes['appr'] = _get_hr_dist(item.dttm)
+                    previous_mes['mes'] = (item[0], item[1])
+                    previous_mes['appr'] = _get_hr_dist(item[0])
                     # заменяем значение замера в начале часа
-                    res['ctrl_h'][ctrl_hour] = Hist(item.dttm, item.value)
-            res['data'].append(Hist(item.dttm, item.value))
-
+                    res['ctrl_h'][ctrl_hour] = Hist(item[0], item[1])
+            res['data'].append(Hist(item[0], item[1]))
+        pcs_source.close()
         return res
-"""

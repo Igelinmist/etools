@@ -6,12 +6,17 @@ from .models.extern_data_models import Param
 
 class ParamTestCase(TestCase):
 
+    def setUp(self):
+        Param.load_params()
+
     def test_getting_params(self):
+        """ test params load from external db"""
         params_cnt = Param.objects.count()
 
         self.assertGreater(params_cnt, 0)
 
     def test_getting_history_data(self):
+        """ test getting historical data """
         param = Param.objects.get(pk=5324846)
         hist = param.get_hist_data()
         hist_data = hist['data']

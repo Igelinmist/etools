@@ -34,7 +34,7 @@ class BandForm(forms.ModelForm):
     )
     param_num = forms.ChoiceField(
         label='Параметр',
-        # choices=((p.prmnum, p.__str__()) for p in Param.objects.all().order_by('prmnum')),
+        choices=((p.prmnum, p.__str__()) for p in Param.objects.all().order_by('prmnum')),
         widget=forms.Select(attrs={
             "class": 'prmchoice', })
     )

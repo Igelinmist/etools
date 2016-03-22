@@ -39,7 +39,6 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'bootstrap3_datetime',
     'widget_tweaks',
-    'behave_django',
 )
 
 PROJECT_APPS = (
