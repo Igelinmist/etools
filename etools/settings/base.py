@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'bootstrap3_datetime',
     'widget_tweaks',
+    'behave_django',
 )
 
 PROJECT_APPS = (
@@ -138,6 +139,13 @@ STATIC_ROOT = join(BASE_DIR, "static/")
 # for flatpages
 
 SITE_ID = 1
+
+PCS_DATABASE = {
+    'HOST': 'CHANGE_IT_IN_PRODUCTION!',
+    'PORT': 'CHANGE_IT_IN_PRODUCTION!',
+    'USER': 'CHANGE_IT_IN_PRODUCTION!',
+    'PWD': 'CHANGE_IT_IN_PRODUCTION!',
+}
 
 # .local.py overrides all the common settings.
 try:

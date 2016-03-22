@@ -1,12 +1,72 @@
-from collections import namedtuple
+# from collections import namedtuple
 
+import psycopg2
 from django.db import models
-from django.db.models.loading import cache
+# from django.db.models.loading import cache
 
-from datetime import date, timedelta, datetime
+# from datetime import date, timedelta, datetime
 
-from ..constants import PERMISSIBLE_PREC
+from django.conf import settings
 
+
+# from ..constants import PERMISSIBLE_PREC
+
+
+class PCS():
+
+    def __init__(self, db_host, db_port, db_user, db_pwd):
+        self.db_host = db_host
+        self.db_port = db_port
+        self.db_user = db_user
+        self.db_pwd = db_pwd
+
+    def open(self):
+        conn_str = 'host=%s port=%s user=%s password=%s dbname=fdata' % (
+            self.db_host, self.db_port, self.db_user, self.db_pwd)
+        self.conn = psycopg2.connect(conn_str)
+        self.cur = self.conn.cursor()
+
+    def close(self):
+        self.conn.commit()
+        self.cur.close()
+        self.conn.close()
+
+    def get_params(self):
+        self.cur.execute('SELECT * FROM params;')
+        return self.cur.fetchall()
+
+pcs_source = PCS(
+    db_host=settings.PCS_DATABASE['HOST'],
+    db_port=settings.PCS_DATABASE['PORT'],
+    db_user=settings.PCS_DATABASE['USER'],
+    db_pwd=settings.PCS_DATABASE['PWD'],
+    )
+
+
+class Param(models.Model):
+    """
+    Description: Отображение параметра из таблицы params fdata
+    """
+    prmnum = models.IntegerField(primary_key=True)
+    prmname = models.CharField(max_length=70)
+    ms_accronim = models.CharField(max_length=15)
+    mesunit = models.CharField(max_length=10, null=True)
+
+    class Meta:
+        verbose_name = 'параметр'
+        verbose_name_plural = 'параметры'
+        db_table = 'params'
+        ordering = ('prmnum',)
+
+    def load_params():
+        pcs_source.open()
+        dataset = pcs_source.get_params()
+        prm_list = [Param(prmnum=p[0], prmname=p[2], ms_accronim=p[1], mesunit=p[8],) for p in dataset]
+        Param.objects.bulk_create(prm_list)
+        pcs_source.close()
+
+
+"""
 
 class HistoryDataManager(models.Manager):
 
@@ -102,9 +162,6 @@ class Param(models.Model):
     def get_hist_data(self, dttm_from=None, dttm_to=None):
 
         def _get_hr_dist(dttm):
-            """
-            function calculate time-distance to closest hour start
-            """
             if dttm.minute < 30:
                 res = timedelta(minutes=dttm.minute, seconds=dttm.second)
             else:
@@ -149,3 +206,4 @@ class Param(models.Model):
             res['data'].append(Hist(item.dttm, item.value))
 
         return res
+"""
