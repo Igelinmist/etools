@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, time
 from django.test import TestCase
 
-from .models.extern_data_models import Param
+from pcs.models.extern_data_models import Param
 
 
 class ParamTestCase(TestCase):
@@ -27,11 +27,13 @@ class ParamTestCase(TestCase):
         self.assertNotEqual(item.dt, None)
 
     def test_getting_slice_data(self):
+        """ test getting hours slices """
         param = Param.objects.get(pk=5324846)
-        hist = param.get_hist_data()
+        from_dttm = date.today() - timedelta(days=1)
+        from_dttm = datetime.combine(from_dttm, time())
+        to_dttm = from_dttm + timedelta(hours=12)
+        hist = param.get_hist_data(from_dttm, to_dttm)
         hist_data_hr = hist['ctrl_h']
-        td = date.today()
-        today_start = datetime(td.year, td.month, td.day)
 
         self.assertGreater(len(hist_data_hr), 0)
-        self.assertEqual(today_start in hist_data_hr, True)
+        self.assertEqual(from_dttm + timedelta(hours=1) in hist_data_hr, True)

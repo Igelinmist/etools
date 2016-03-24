@@ -6,14 +6,3 @@ PCS_DATABASE = {
     'USER': 'pcs_view',
     'PWD': 'pcs',
 }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/tmp/django_simple_skeleton_test.db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-}

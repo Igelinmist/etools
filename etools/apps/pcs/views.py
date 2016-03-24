@@ -13,7 +13,8 @@ def index(request):
 
 
 def reports(request):
-    context = {'form': ChooseReportForm(None)}
+    rtype = request.GET.get('rtype', 'hs')
+    context = {'form': ChooseReportForm(None, rtype=rtype)}
     return render(request, 'pcs/reports.html', context)
 
 

@@ -1,9 +1,9 @@
 from django.test import TestCase
 from datetime import date, timedelta
 
-from ..models.journal_models import Equipment, Journal
-from ..models.report_models import Report, Column
-from ..constants import B_FORM, DS_FORM
+from uptime.models.journal_models import Equipment, Journal
+from uptime.models.report_models import Report
+from uptime.constants import B_FORM, DS_FORM
 
 
 class JournalTestCase(TestCase):

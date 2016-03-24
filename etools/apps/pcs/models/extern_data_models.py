@@ -5,7 +5,7 @@ import psycopg2
 from django.db import models
 from django.conf import settings
 
-from ..constants import PERMISSIBLE_PREC
+from pcs.constants import PERMISSIBLE_PREC
 
 
 Hist = namedtuple('Hist', ['dt', 'v'])

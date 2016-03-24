@@ -2,9 +2,11 @@ from django import forms
 
 from bootstrap3_datetime.widgets import DateTimePicker
 
-from .models.extern_data_models import Param
-from .models.report_models import Report
-from .models.report_models import Band
+from pcs.models.extern_data_models import Param
+from pcs.models.report_models import Report
+from pcs.models.report_models import Band
+
+param_choices = [(None, '----'), ] + [(p.prmnum, p.__str__()) for p in Param.objects.all().order_by('prmnum')]
 
 
 class BandForm(forms.ModelForm):
@@ -34,9 +36,10 @@ class BandForm(forms.ModelForm):
     )
     param_num = forms.ChoiceField(
         label='Параметр',
-        choices=((p.prmnum, p.__str__()) for p in Param.objects.all().order_by('prmnum')),
-        widget=forms.Select(attrs={
-            "class": 'prmchoice', })
+        choices=param_choices,
+        widget=forms.Select(
+            attrs={"class": 'prmchoice', }
+        )
     )
 
     class Meta:
@@ -61,3 +64,9 @@ class ChooseReportForm(forms.Form):
                                        "pickTime": True}),
         label='Конец отчета:',
     )
+
+    def __init__(self, *args, **kwargs):
+        rtype = kwargs.pop('rtype', None)
+        super(ChooseReportForm, self).__init__(*args, **kwargs)
+        if rtype:
+            self.fields['report'].queryset = Report.objects.filter(rtype=rtype)
