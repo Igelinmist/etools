@@ -56,7 +56,9 @@
         type: $(this).attr("method"),
         url: $(this).attr("action"),
         success: function(data) {
-          $("#record-form-"+data.journal_id).css("color", "gray");
+          $("#record-form-"+data.journal_id)
+            .css("color", "gray")
+            .css("border", "none");
           $("#record-form-"+data.journal_id).find(".apply-btn").hide();
         }
       });
@@ -65,10 +67,44 @@
     $(".has_record").filter(function() {
       return this.getAttribute("value") == "1";
     }).parent().find(".apply-btn").hide();
-    $(".interval").bind("dblclick", function(e) {
-      e.preventDefault();
-      $(this).val("24:00");
-      $(this).trigger("change");
+    $(".interval").bind({
+      dblclick: function(e) {
+        e.preventDefault();
+        $(this).val("24:00");
+        $(this).trigger("change");
+      },
+      focusout: function() {
+        var sumInterval = {
+            hour: 0,
+            minute: 0,
+            includeInterval: function(txtInterval) {
+                arrInterval = txtInterval.split(':');
+                this.hour += Number(arrInterval[0]);
+                this.minute += Number(arrInterval[1]);
+                if (this.minute >= 60) {
+                  tmpMin = this.minute;
+                  this.minute = this.minute % 60;
+                  this.hour += (tmpMin - this.minute) / 60;
+                }
+            },
+            isCorrect: function() {
+              if ((this.hour * 60 + this.minute) == 1440) {
+                return true;
+              } else {
+                return false;
+              }
+            }
+        };
+        form = $(this).parent();
+        $(form).find(".interval").each(function(n, element) {
+          sumInterval.includeInterval($(element).val());
+        });
+        if (! sumInterval.isCorrect()) {
+          $(form).css("border", "thick double red");
+        } else {
+          $(form).css("border", "none");
+        };
+      },
     });
     $("input").bind("change", function(e) {
       e.preventDefault();
