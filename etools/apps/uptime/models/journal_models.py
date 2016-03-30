@@ -293,7 +293,8 @@ class Journal(models.Model):
         # Теперь нужно выбрать дату от которой плясать
         # Если задано время начала отчета и было вычислено время "от события" - надо выбрать одно из двух
         if date_from and date_from_event:
-            date_from = date_from if date_from > date_from_event else date_from_event
+            y, m, d = date_from.split('-')
+            date_from = date_from if date(int(y), int(m), int(d)) > date_from_event else date_from_event
             rec_set = rec_set.filter(rdate__gt=date_from)
         elif date_from:
             # Если задано время начала отчета, но нет времени события - использовать его как начало
