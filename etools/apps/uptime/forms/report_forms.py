@@ -4,10 +4,16 @@ from bootstrap3_datetime.widgets import DateTimePicker
 
 
 class ChooseReportForm(forms.Form):
+    date_from = forms.DateField(
+        widget=DateTimePicker(options={"locale": "ru",
+                                       "pickTime": False}),
+        label='От даты:',
+    )
+
     date = forms.DateField(
         widget=DateTimePicker(options={"locale": "ru",
                                        "pickTime": False}),
-        label='На дату:',
+        label=', на дату:',
     )
 
     def __init__(self, choices=None, *args, **kwargs):

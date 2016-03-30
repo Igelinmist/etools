@@ -28,8 +28,9 @@ def reports(request):
 def report_show(request):
     report = get_object_or_404(Report, pk=request.GET['report_id'])
     context = {
-        'rdata': report.prepare_reports_content(request.GET['date']),
+        'rdata': report.prepare_reports_content(request.GET['date'], request.GET['date_from']),
         'rdate': request.GET['date'],
+        'rdate_from': request.GET['date_from'],
     }
     return render(
         request,
