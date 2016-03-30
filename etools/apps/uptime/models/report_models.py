@@ -47,7 +47,7 @@ class Report(models.Model):
             'columns': columns,
         }
 
-    def prepare_report_data(self, report_date=None):
+    def prepare_report_data(self, report_date=None, report_date_from=None):
         """
         Метод заполняет данными таблицу для отчета
         """
@@ -59,7 +59,8 @@ class Report(models.Model):
             report_table.append([journals[indxr][0].equipment.name] + [journals[indxr][indxc].get_report_cell(
                 from_event=col.from_event,
                 summary_type=col.column_type,
-                date_to=report_date) if journals[indxr][indxc] else '-' for (indxc, col) in enumerate(columns)])
+                date_to=report_date,
+                date_from=report_date_from) if journals[indxr][indxc] else '-' for (indxc, col) in enumerate(columns)])
         return report_table
 
     def get_reports_collection(root_eq):
@@ -84,7 +85,7 @@ class Report(models.Model):
                 )
         return report_set
 
-    def prepare_reports_content(self, ru_date=None):
+    def prepare_reports_content(self, ru_date=None, ru_date_from=None):
         """
         Метод готовит одну или несколько таблиц отчетов,
         в зависимости от того, является ли исходный отчет
@@ -97,13 +98,20 @@ class Report(models.Model):
             qdate = '{}-{}-{}'.format(y, m, d)
         else:
             qdate = None
+
+        if ru_date_from:
+            d, m, y = ru_date_from.split('.')
+            qdate_from = '{}-{}-{}'.format(y, m, d)
+        else:
+            qdate_from = None
         report_list = []
         if self.is_generalizing:
             for eq in self.equipment.parts.order_by('name').all():
                 try:
                     temp_report = eq.report
                     temp_report_table = temp_report.prepare_report_data(
-                        report_date=qdate
+                        report_date=qdate,
+                        report_date_from=qdate_from,
                     )
                     report_list.append((temp_report, temp_report_table))
                 except Report.DoesNotExist:
@@ -111,7 +119,10 @@ class Report(models.Model):
         else:
             report_list.append(
                 (self,
-                 self.prepare_report_data(report_date=qdate))
+                 self.prepare_report_data(
+                    report_date=qdate,
+                    report_date_from=qdate_from,
+                    ))
             )
         sorted_report_list = sorted(report_list, key=lambda k: k[0].weight)
         return sorted_report_list

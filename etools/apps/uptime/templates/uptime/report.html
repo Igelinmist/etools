@@ -6,6 +6,10 @@
         {% else %}
             текущую дату
         {% endif %}
+        {% if rdate_from %}
+            c
+            {{ rdate_from }}
+        {% endif %}
     </small></h2>
     {% for report, rtable in rdata %}
     <table class="table table-bordered table-condensed">

@@ -263,7 +263,7 @@ class Journal(models.Model):
         else:
             return self
 
-    def get_report_cell(self, summary_type='ITV', from_event='FVZ', date_to=None):
+    def get_report_cell(self, summary_type='ITV', from_event='FVZ', date_to=None, date_from=None):
         from_event_to_event_dict = {
             'FVZ': 'zmn',
             'FKR': 'vkr',
@@ -273,26 +273,41 @@ class Journal(models.Model):
         journal = self.equipment.plant.journal if self.stat_by_parent else self
         rec_set = journal.records  # Начитаем готовить query_set здесь он еще не выполняется
         try:
-            date_from = self.events.filter(
+            date_from_event = self.events.filter(
                 event_code=from_event_to_event_dict[from_event]
             ).order_by('-date')[0].date
             if summary_type == 'DT':
-                return date_from.strftime("%d.%m.%Y")
+                return date_from_event.strftime("%d.%m.%Y")
         except IndexError:
-            date_from = None
+            date_from_event = None
             if from_event != 'FVZ':
                 return '-'
             elif summary_type == 'DT':
                 return '-'
-        if date_from:
+        if date_from_event:
             # Время "от события" откатываем на начало месяца, поскольку
             # капитальный и средный ремонты, замены и реконструкции
             # длятся не менее месяца, а раньше интервалы фиксировались
             # за месяц или год, что приводит к неверному расчету
-            date_from = date(date_from.year, date_from.month, 1)
+            date_from_event = date(date_from_event.year, date_from_event.month, 1)
+        # Теперь нужно выбрать дату от которой плясать
+        # Если задано время начала отчета и было вычислено время "от события" - надо выбрать одно из двух
+        if date_from and date_from_event:
+            date_from = date_from if date_from > date_from_event else date_from_event
             rec_set = rec_set.filter(rdate__gt=date_from)
+        elif date_from:
+            # Если задано время начала отчета, но нет времени события - использовать его как начало
+            rec_set = rec_set.filter(rdate__gt=date_from)
+        elif date_from_event:
+            date_from = date_from_event
+            rec_set = rec_set.filter(rdate__gt=date_from)
+
+        # Если не задано ни то ни другое время - считаем все записи, предшествующие времени, т.е. не используем условие
+
         if date_to:
             rec_set = rec_set.exclude(rdate__gte=date_to)
+        else:
+            rec_set = rec_set.exclude(rdate__gte=date.today())
         if summary_type == 'PCN':
             return rec_set.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
         elif summary_type == 'OCN':
