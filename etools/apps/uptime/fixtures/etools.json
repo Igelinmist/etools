@@ -1,0 +1,214 @@
+[
+    {
+        "model": "uptime.equipment",
+        "pk": 1,
+        "fields": {
+            "name": "Plant"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 2,
+        "fields": {
+            "plant": 1,
+            "name": "Eq-01"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 3,
+        "fields": {
+            "plant": 1,
+            "name": "Eq-02"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 4,
+        "fields": {
+            "plant": 2,
+            "name": "Detail01"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 5,
+        "fields": {
+            "plant": 3,
+            "name": "Detail01"
+        }
+    },
+    {
+        "model": "uptime.journal",
+        "pk": 1,
+        "fields": {
+            "equipment": 2,
+            "downtime_stat": true
+        }
+    },
+    {
+        "model": "uptime.journal",
+        "pk": 2,
+        "fields": {
+            "equipment": 3,
+            "downtime_stat": true
+        }
+    },
+    {
+        "model": "uptime.journal",
+        "pk": 3,
+        "fields": {
+            "equipment": 4,
+            "stat_by_parent": true
+        }
+    },
+    {
+        "model": "uptime.journal",
+        "pk": 4,
+        "fields": {
+            "equipment": 5,
+            "stat_by_parent": true
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 1,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-01",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 1,
+        "fields": {
+            "record": 1,
+            "state_code": "wrk",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 2,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-02",
+            "down_cnt": 1,
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 2,
+        "fields": {
+            "record": 2,
+            "state_code": "wrk",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 3,
+        "fields": {
+            "journal": 1,
+            "rdate": "2016-03-03",
+            "up_cnt": 1,
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 3,
+        "fields": {
+            "record": 3,
+            "state_code": "wrk",
+            "time_in_state": "10:00:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 4,
+        "fields": {
+            "journal": 1,
+            "rdate": "2016-03-04",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 4,
+        "fields": {
+            "record": 4,
+            "state_code": "wrk",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.report",
+        "pk": 1,
+        "fields": {
+            "equipment": 1,
+            "is_generalizing": true,
+            "title": "Plant Report"
+        }
+    },
+    {
+        "model": "uptime.column",
+        "pk": 1,
+        "fields": {
+            "report": 1,
+            "title": "TW",
+            "column_type": "ITV",
+            "from_event": "FVZ"
+        }
+    },
+    {
+        "model": "uptime.column",
+        "pk": 2,
+        "fields": {
+            "report": 1,
+            "title": "Vv/Z",
+            "column_type": "DT",
+            "from_event": "FVZ",
+            "weight": 1
+        }
+    },
+    {
+        "model": "uptime.column",
+        "pk": 3,
+        "fields": {
+            "report": 1,
+            "title": "FrKR",
+            "column_type": "ITV",
+            "from_event": "FKR",
+            "weight": 2
+        }
+    },
+    {
+        "model": "uptime.column",
+        "pk": 4,
+        "fields": {
+            "report": 1,
+            "title": "VvKR",
+            "column_type": "DT",
+            "from_event": "FKR",
+            "weight": 3
+        }
+    },
+    {
+        "model": "uptime.column",
+        "pk": 5,
+        "fields": {
+            "report": 1,
+            "title": "UpCnt",
+            "column_type": "PCN",
+            "from_event": "FVZ",
+            "weight": 4
+        }
+    }
+]

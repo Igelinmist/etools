@@ -112,110 +112,193 @@ class JournalTestCase(TestCase):
 
 class EquipmentTestCase(TestCase):
 
-    def setUp(self):
-        gr = Equipment.objects.create(name='Group')
-        mu = Equipment.objects.create(name='Main Unit', plant=gr)
-        su = Equipment.objects.create(name='Sub Unit', plant=mu)
-        journal = Journal.objects.create(equipment=mu, downtime_stat=True)
-        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
-        Journal.objects.create(equipment=su, stat_by_parent=True)
+    fixtures = ['etools.json']
 
-    def test_collect_sub_stat_on_date_all_empty(self):
-        head_unit = Equipment.objects.filter(plant=None)[0]
-        sub_stat = head_unit.collect_sub_stat_on_date('02.01.2015')
-        journal = Journal.objects.all()[0]
+    def test_collect_sub_stat_on_date_still_no_data(self):
+        """
+        The journal_view function records_on_date
+        Can call the Journal method collect_sub_stat_on_date (data for equipment tree)
+        Get data for new date (empty data)
+        """
+        unit = Equipment.objects.get(pk=1)
+        stat = unit.collect_sub_stat_on_date('01.03.2016')
 
-        self.assertEquals(sub_stat,
-                          [{'name': 'Group', 'ident': 0, 'form_type': 0},
-                           {'name': 'Main Unit',
-                            'journal_id': journal.id,
-                            'ident': 1, 'form_type': B_FORM | DS_FORM,
-                            'has_record': False,
-                            'rec_data': {'rdate': '02.01.2015',
-                                         'wrk': '0:00',
-                                         'up_cnt': 0,
-                                         'down_cnt': 0,
-                                         'rsv': '0:00',
-                                         'trm': '0:00',
-                                         'arm': '0:00',
-                                         'krm': '0:00',
-                                         'srm': '0:00',
-                                         'rcd': '0:00',
-                                         }}])
+        self.assertEquals(stat, [
+            {'name': 'Plant', 'ident': 0, 'form_type': 0},
+            {'name': 'Eq-01',
+             'journal_id': 1,
+             'ident': 1, 'form_type': B_FORM | DS_FORM,
+             'has_record': False,
+             'rec_data': {
+                'rdate': '01.03.2016',
+                'wrk': '0:00',
+                'up_cnt': 0,
+                'down_cnt': 0,
+                'rsv': '0:00',
+                'trm': '0:00',
+                'arm': '0:00',
+                'krm': '0:00',
+                'srm': '0:00',
+                'rcd': '0:00',
+              }},
+            {'name': 'Eq-02',
+             'journal_id': 2,
+             'ident': 1, 'form_type': B_FORM | DS_FORM,
+             'has_record': False,
+             'rec_data': {
+                'rdate': '01.03.2016',
+                'wrk': '0:00',
+                'up_cnt': 0,
+                'down_cnt': 0,
+                'rsv': '0:00',
+                'trm': '0:00',
+                'arm': '0:00',
+                'krm': '0:00',
+                'srm': '0:00',
+                'rcd': '0:00',
+             }}, ]
+        )
 
-    def test_collect_sub_stat_on_date_has_record(self):
-        head_unit = Equipment.objects.filter(plant=None)[0]
-        sub_stat = head_unit.collect_sub_stat_on_date('01.01.2015')
-        journal = Journal.objects.all()[0]
+    def test_collect_sub_stat_on_date_with_data(self):
+        """
+        The journal_view function records_on_date
+        Can call the Journal method collect_sub_stat_on_date (data for equipment tree)
+        Get data for date partly with data
+        """
+        unit = Equipment.objects.get(pk=1)
+        stat = unit.collect_sub_stat_on_date('03.03.2016')
 
-        self.assertEquals(sub_stat,
-                          [{'name': 'Group', 'ident': 0, 'form_type': 0},
-                           {'name': 'Main Unit',
-                            'journal_id': journal.id,
-                            'ident': 1, 'form_type': B_FORM | DS_FORM,
-                            'has_record': True,
-                            'rec_data': {'rdate': '01.01.2015',
-                                         'wrk': '15:00',
-                                         'up_cnt': 0,
-                                         'down_cnt': 1,
-                                         'rsv': '0:00',
-                                         'trm': '0:00',
-                                         'arm': '9:00',
-                                         'krm': '0:00',
-                                         'srm': '0:00',
-                                         'rcd': '0:00',
-                                         }}])
+        self.assertEquals(stat, [
+            {'name': 'Plant', 'ident': 0, 'form_type': 0},
+            {'name': 'Eq-01',
+             'journal_id': 1,
+             'ident': 1, 'form_type': B_FORM | DS_FORM,
+             'has_record': True,
+             'rec_data': {
+                'rdate': '03.03.2016',
+                'wrk': '10:00',
+                'up_cnt': 1,
+                'down_cnt': 0,
+                'rsv': '0:00',
+                'trm': '0:00',
+                'arm': '0:00',
+                'krm': '0:00',
+                'srm': '0:00',
+                'rcd': '0:00',
+              }},
+            {'name': 'Eq-02',
+             'journal_id': 2,
+             'ident': 1, 'form_type': B_FORM | DS_FORM,
+             'has_record': False,
+             'rec_data': {
+                'rdate': '03.03.2016',
+                'wrk': '0:00',
+                'up_cnt': 0,
+                'down_cnt': 0,
+                'rsv': '0:00',
+                'trm': '0:00',
+                'arm': '0:00',
+                'krm': '0:00',
+                'srm': '0:00',
+                'rcd': '0:00',
+             }}, ]
+        )
 
 
 class ReportTestCase(TestCase):
 
-    def setUp(self):
-        eobj = Equipment.objects.create(name='EObject')
-        gr = Equipment.objects.create(name='Group', plant=eobj)
-        mu = Equipment.objects.create(name='Unit', plant=gr)
-        su = Equipment.objects.create(name='SubUnit', plant=mu)
-        journal = Journal.objects.create(equipment=mu, downtime_stat=True)
-        journal.write_record('01.11.2014', wrk='24:00')
-        journal.write_record('02.11.2014', krm='24:00', down_cnt=1)
-        journal.write_record('01.01.2015', krm='24:00')
-        journal.events.create(event_code='vkr', date='2015-01-02')
-        journal.write_record('02.01.2015', wrk='15:00', krm='9:00', up_cnt=1)
-        Journal.objects.create(equipment=su, stat_by_parent=True)
-        Report.objects.create(equipment=eobj, is_generalizing=True, title='Report Name')
-        rep = Report.objects.create(equipment=gr, title='Units')
-        rep.columns.create(title='TW', column_type='ITV', from_event='FVZ')
-        rep.columns.create(title='Vv/Z', column_type='DT', from_event='FVZ', weight=1)
-        rep.columns.create(title='FrKR', column_type='ITV', from_event='FKR', weight=2)
-        rep.columns.create(title='VvKR', column_type='DT', from_event='FKR', weight=3)
-        rep.columns.create(title='TWS', column_type='ITV',
-                           from_event='FVZ', weight=4, element_name_filter='SubUnit')
-        rep.columns.create(title='ZSu', column_type='DT',
-                           from_event='FVZ', weight=5, element_name_filter='SubUnit')
-        rep.columns.create(title='UpCnt', column_type='PCN', from_event='FVZ', weight=6)
-        rep.columns.create(title='DownCnt', column_type='OCN', from_event='FVZ', weight=7)
+    fixtures = ['etools.json']
 
-    # def test_prepare_journals_id_for_report(self):
-    #     rep = Report.objects.filter(title='Units')[0]
-    #     eq_set = Equipment.objects
-    #     j = eq_set.filter(name='Unit')[0].journal.id
-    #     sj = eq_set.filter(name='SubUnit')[0].journal.id
-
-    #     self.assertEquals(rep.prepare_journals_id_for_report()['journals_id'],
-    #                       [[j, j, j, j, sj, sj, j, j]])
-
-    def test_prepare_report_data(self):
-        rep = Report.objects.filter(title='Units')[0]
+    def test_prepare_report_data_no_events_no_time_limits(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data in output array with undefine date scope
+        """
+        rep = Report.objects.get(pk=1)
 
         self.assertEquals(
             rep.prepare_report_data(), [
-                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'TWS', 'ZSu', 'UpCnt', 'DownCnt'],
-                ['Unit', '39', '-', '15', '02.01.2015', '39', '-', 1, 1]]
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
+                ['Eq-01', '82', '-', '-', '-', '1'],
+                ['Eq-02', '-', '-', '-', '-', '-']]
         )
 
-    # def test_prepare_reports_content(self):
-    #     rep = Report.objects.filter(title='Report Name')[0]
+    def test_prepare_report_data_no_events_with_low_time_limit(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data in output array in definite date scope (early time limit)
+        """
+        rep = Report.objects.get(pk=1)
 
-    #     self.assertEquals(rep.prepare_reports_content(), [rep, [
-    #             ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'TWS', 'ZSu', 'UpCnt', 'DownCnt'],
-    #             ['Unit', '39', '-', '15', '02.01.2015', '39', '-', 1, 1]]]
-    #     )
+        self.assertEquals(
+            rep.prepare_report_data(report_date_from='2016-01-01'), [
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
+                ['Eq-01', '34', '-', '-', '-', '1'],
+                ['Eq-02', '-', '-', '-', '-', '-']]
+        )
+
+    def test_prepare_report_data_no_events_with_high_time_limit(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data in output array in definite date scope (late time limit)
+        """
+        rep = Report.objects.get(pk=1)
+
+        self.assertEquals(
+            rep.prepare_report_data(report_date='2016-03-04'), [
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
+                ['Eq-01', '58', '-', '-', '-', '1'],
+                ['Eq-02', '-', '-', '-', '-', '-']]
+        )
+
+    def test_prepare_report_data_no_events_with_time_limits(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data in output array in definite date scope (both side limit)
+        """
+        rep = Report.objects.get(pk=1)
+
+        self.assertEquals(
+            rep.prepare_report_data(report_date='2016-03-04', report_date_from='2016-03-03'), [
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
+                ['Eq-01', '10', '-', '-', '-', '-'],
+                ['Eq-02', '-', '-', '-', '-', '-']]
+        )
+
+    def test_prepare_report_data_with_event_zamena_no_time_limits(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data about Zamena and Utime after it in output array
+        """
+        rep = Report.objects.get(pk=1)
+        journal = Journal.objects.get(pk=1)
+        journal.events.create(event_code='zmn', date='2016-01-01')
+
+        self.assertEquals(
+            rep.prepare_report_data(), [
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
+                ['Eq-01', '34', '01.01.2016', '-', '-', '1'],
+                ['Eq-02', '-', '-', '-', '-', '-']]
+        )
+
+    def test_prepare_report_data_with_event_vvod_kr_no_time_limits(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data about KR and Uptime after it in output array
+        """
+        rep = Report.objects.get(pk=1)
+        journal = Journal.objects.get(pk=1)
+        journal.events.create(event_code='vkr', date='2016-03-02')
+
+        self.assertEquals(
+            rep.prepare_report_data(), [
+                ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
+                ['Eq-01', '82', '-', '34', '02.03.2016', '1'],
+                ['Eq-02', '-', '-', '-', '-', '-']]
+        )
