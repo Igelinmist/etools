@@ -28,7 +28,7 @@
                 {% csrf_token %}
                 <textarea rows="10" cols="60" id="description-field" name="description" 
                 {% if user.is_authenticated %}
-                    {% if not perms.uptime.update_journal %}
+                    {% if not perms.uptime.update_journal_description %}
                         readonly
                     {% endif %}
                 {% else %}
