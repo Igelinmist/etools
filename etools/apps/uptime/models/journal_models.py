@@ -152,6 +152,7 @@ class Journal(models.Model):
         permissions = (
             ('view_journal_details', 'View journal details'),
             ('view_journal_list', 'View journal list'),
+            ('update_journal_description', 'Update journal description'),
             ('create_journal_record', 'Create record'),
             ('edit_journal_record', 'Edit record'),
             ('delete_journal_record', 'Delete record'),

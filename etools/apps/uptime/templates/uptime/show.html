@@ -25,8 +25,16 @@
     <div class="row">
         <div class="col-md-6">
             <form action="{% url 'uptime:journal_description_update' journal.id %}" method="POST" id="description-form">
-                 {% csrf_token %}
-                 <textarea rows="10" cols="60" id="description-field" name="description">{{ journal.description }}</textarea>
+                {% csrf_token %}
+                <textarea rows="10" cols="60" id="description-field" name="description" 
+                {% if user.is_authenticated %}
+                    {% if not perms.uptime.update_journal %}
+                        readonly
+                    {% endif %}
+                {% else %}
+                    readonly
+                {% endif %}
+                 >{{ journal.description }}</textarea>
             </form>
         </div>
         <div class="col-md-6">
