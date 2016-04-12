@@ -10,7 +10,7 @@ class BaseRecordForm(forms.Form):
     form_type = forms.CharField(widget=forms.HiddenInput(attrs={'value': 'base'}), required=False)
     rdate = forms.CharField(widget=forms.TextInput(attrs={'size': 8, 'readonly': True}), label='Дата')
     wrk = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}),
+        widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}),
         initial='0:00', label='Работа')
     up_cnt = forms.IntegerField(widget=forms.NumberInput(attrs={'style': 'width:3.5em'}),
                                 initial=0, min_value=0, label="Пуски")
@@ -29,12 +29,12 @@ class BaseRecordForm(forms.Form):
 
 class DownStatRecordForm(BaseRecordForm):
     form_type = forms.CharField(widget=forms.HiddenInput(attrs={'value': 'down_stat'}), required=False)
-    rsv = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00', label='РЗ')
-    arm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00', label='АР')
-    trm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00', label='ТР')
-    krm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00', label='КР')
-    srm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00', label='СР')
-    rcd = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00', label='РК')
+    rsv = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}), initial='0:00', label='РЗ')
+    arm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}), initial='0:00', label='АР')
+    trm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}), initial='0:00', label='ТР')
+    krm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}), initial='0:00', label='КР')
+    srm = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}), initial='0:00', label='СР')
+    rcd = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': '([0-9]{1,6}):[0-5][0-9]'}), initial='0:00', label='РК')
 
     def __init__(self, *args, **kwargs):
         is_individual = kwargs.pop('is_individual', False)
@@ -53,7 +53,7 @@ class DownStatRecordForm(BaseRecordForm):
 
 
 class HotReservRecordForm(BaseRecordForm):
-    hrs = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval'}), initial='0:00')
+    hrs = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': "([0-9]{1,6}):[0-5][0-9]"}), initial='0:00')
 
     def __init__(self, *args, **kwargs):
         is_individual = kwargs.pop('is_individual', False)

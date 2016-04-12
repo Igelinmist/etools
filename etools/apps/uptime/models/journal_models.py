@@ -80,7 +80,7 @@ class Equipment(models.Model):
     def collect_sub_stat_on_date(self, stat_date):
         """
         Description: Метод собирает все наличествующие записи статистики для дерева
-        журналов (на базе дерева оборудования).
+        журналов (на базе дерева оборудования) от указанного узла.
         """
         eq_list = self.unit_tree()
         # Собрать все номера журналов
@@ -293,7 +293,8 @@ class Journal(models.Model):
         # Теперь нужно выбрать дату от которой плясать
         # Если задано время начала отчета и было вычислено время "от события" - надо выбрать одно из двух
         if date_from and date_from_event:
-            date_from = date_from if date_from > date_from_event else date_from_event
+            y, m, d = map(lambda x: int(x), date_from.split('-'))
+            date_from = date_from if date(y, m, d) > date_from_event else date_from_event
             rec_set = rec_set.filter(rdate__gt=date_from)
         elif date_from:
             # Если задано время начала отчета, но нет времени события - использовать его как начало
@@ -309,10 +310,11 @@ class Journal(models.Model):
         else:
             rec_set = rec_set.exclude(rdate__gte=date.today())
         if summary_type == 'PCN':
-            return rec_set.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
+            cnt = rec_set.aggregate(models.Sum('up_cnt'))['up_cnt__sum']
+            return str(cnt) if cnt else '-'
         elif summary_type == 'OCN':
-            return rec_set.aggregate(
-                models.Sum('down_cnt'))['down_cnt__sum']
+            cnt = rec_set.aggregate(models.Sum('down_cnt'))['down_cnt__sum']
+            return str(cnt) if cnt else '-'
         else:
             return journal.get_stat(
                 from_date=date_from,

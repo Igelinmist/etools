@@ -23,22 +23,24 @@
         {% endif %}
       >
       {% if data_row.form_type %}
-          <div class="col-md-2"><a href="{%url 'uptime:show' data_row.journal_id%}"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></a></div>
-           <div class="col-md-10">
-          <form action="{% url 'uptime:silent_record_create_or_update' %}" method="POST" class="form-inline record-form" id="record-form-{{data_row.journal_id}}" role="form">
-          {% csrf_token %}
-          <input type="hidden" name="journal_id" value="{{data_row.journal_id}}">
-          {{data_row.form_content}}
-          {% if data_row.has_record %}
-            <input type="hidden" class="has_record" value="1" />
-          {% else %}
-            <input type="hidden" class="has_record" value="0" />
-          {% endif %} 
-          <input type="submit" value="Записать" class="apply-btn">
-          </form>
-          </div>
+            <div class="col-md-12 {% cycle 'bg-success' 'bg-warning' %}">
+            <div class="col-md-2"><a href="{%url 'uptime:show' data_row.journal_id%}"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></a></div>
+             <div class="col-md-10">
+            <form action="{% url 'uptime:silent_record_create_or_update' %}" method="POST" class="form-inline record-form" id="record-form-{{data_row.journal_id}}" role="form">
+            {% csrf_token %}
+            <input type="hidden" name="journal_id" value="{{data_row.journal_id}}">
+            {{data_row.form_content}}
+            {% if data_row.has_record %}
+              <input type="hidden" class="has_record" value="1" />
+            {% else %}
+              <input type="hidden" class="has_record" value="0" />
+            {% endif %} 
+            <input type="submit" value="Записать" class="apply-btn">
+            </form>
+            </div>
+            </div>
       {% else %}
-          <div class="col-md-12"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
+          <div class="col-md-12 bg-info"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></div>
       {% endif %}
       </div>
   {% endfor %}
@@ -54,7 +56,9 @@
         type: $(this).attr("method"),
         url: $(this).attr("action"),
         success: function(data) {
-          $("#record-form-"+data.journal_id).css("color", "gray");
+          $("#record-form-"+data.journal_id)
+            .css("color", "gray")
+            .css("border", "none");
           $("#record-form-"+data.journal_id).find(".apply-btn").hide();
         }
       });
@@ -63,10 +67,44 @@
     $(".has_record").filter(function() {
       return this.getAttribute("value") == "1";
     }).parent().find(".apply-btn").hide();
-    $(".interval").bind("dblclick", function(e) {
-      e.preventDefault();
-      $(this).val("24:00");
-      $(this).trigger("change");
+    $(".interval").bind({
+      dblclick: function(e) {
+        e.preventDefault();
+        $(this).val("24:00");
+        $(this).trigger("change");
+      },
+      focusout: function() {
+        var sumInterval = {
+            hour: 0,
+            minute: 0,
+            includeInterval: function(txtInterval) {
+                arrInterval = txtInterval.split(':');
+                this.hour += Number(arrInterval[0]);
+                this.minute += Number(arrInterval[1]);
+                if (this.minute >= 60) {
+                  tmpMin = this.minute;
+                  this.minute = this.minute % 60;
+                  this.hour += (tmpMin - this.minute) / 60;
+                }
+            },
+            isCorrect: function() {
+              if (((this.hour * 60 + this.minute) == 1440) || ((this.hour * 60 + this.minute) == 0)) {
+                return true;
+              } else {
+                return false;
+              }
+            }
+        };
+        form = $(this).parent();
+        $(form).find(".interval").each(function(n, element) {
+          sumInterval.includeInterval($(element).val());
+        });
+        if (! sumInterval.isCorrect()) {
+          $(form).css("border", "thick double red");
+        } else {
+          $(form).css("border", "none");
+        };
+      },
     });
     $("input").bind("change", function(e) {
       e.preventDefault();
