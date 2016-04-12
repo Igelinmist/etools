@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import permission_required
+from django.contrib import messages
 
 from ..models.journal_models import Equipment, Journal, EventItem
 from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, ChooseRecordsDateForm, EventForm
@@ -24,6 +25,7 @@ def show(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     record_list = journal.get_last_records(depth=5)
     event_list = journal.events.order_by('-date')[:3]
+    messages.add_message(request, messages.SUCCESS, 'Hello, I am a first message')
     form = EventForm(None)
     context = {
         'journal': journal,
@@ -32,6 +34,10 @@ def show(request, journal_id):
         'form': form,
     }
     return render(request, 'uptime/show.html', context)
+
+
+def journal_description_update(request, journal_id):
+    pass
 
 
 @permission_required('uptime.create_journal_record',

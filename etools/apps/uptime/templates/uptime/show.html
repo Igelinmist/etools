@@ -21,34 +21,45 @@
     {% if not journal.stat_by_parent and perms.uptime.create_journal_record%}
         <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />
     {% endif %}
-    <h3>Записи событий</h3>
-    <table class="table table-condensed">
-        <tr>
-            <th>Дата</th>
-            <th>Событие</th>
-            <th></th>
-        </tr>
-        {% for event in event_list %}
-            <tr>
-                <td>{{ event.date|date:"d.m.Y" }}</td>
-                <td>{{ event.event_code|human_event }}</td>
-                <td>
-                    {% if user.is_authenticated and perms.uptime.delete_journal_event %}
-                    <a href="{% url 'uptime:event_delete' journal.id event.id %}" class="btn btn-danger">
-                        <span class="glyphicon glyphicon-minus-sign"></span>
-                    </a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-    {% if user.is_authenticated and perms.uptime.create_journal_event %}
-        <form action="{% url 'uptime:event_new' journal.id %}" method="post" class="form-inline">
-            {% csrf_token %}
-            {{ form }}
-        <input type="submit" value="Добавить" class="btn btn-primary"/>
-        </form>
-    {% endif %}
+    <br />
+    <div class="row">
+        <div class="col-md-6">
+           <form action="{% url 'uptime:journal_description_update' journal.id %}" method="POST">
+              {% csrf_token %}
+              <textarea rows="10" cols="60">{{ journal.description }}</textarea>
+          </form>
+        </div>
+        <div class="col-md-6">
+            <h3>Записи событий</h3>
+            <table class="table table-condensed">
+                <tr>
+                    <th>Дата</th>
+                    <th>Событие</th>
+                    <th></th>
+                </tr>
+                {% for event in event_list %}
+                    <tr>
+                        <td>{{ event.date|date:"d.m.Y" }}</td>
+                        <td>{{ event.event_code|human_event }}</td>
+                        <td>
+                            {% if user.is_authenticated and perms.uptime.delete_journal_event %}
+                            <a href="{% url 'uptime:event_delete' journal.id event.id %}" class="btn btn-danger">
+                                <span class="glyphicon glyphicon-minus-sign"></span>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if user.is_authenticated and perms.uptime.create_journal_event %}
+                <form action="{% url 'uptime:event_new' journal.id %}" method="post" class="form-inline">
+                    {% csrf_token %}
+                    {{ form }}
+                <input type="submit" value="Добавить" class="btn btn-primary"/>
+                </form>
+            {% endif %}
+        </div>
+    </div>
     <br />
     <p>
         <a href="{% url 'uptime:index' %}" class="btn btn-default active" role="button">К журналам</a>
@@ -58,3 +69,4 @@
         <a href="{% url 'uptime:records' journal.id %}" class="btn btn-default active" role="button">Архив записей</a>
     </p>
 {% endblock content %}
+
