@@ -24,10 +24,10 @@
     <br />
     <div class="row">
         <div class="col-md-6">
-           <form action="{% url 'uptime:journal_description_update' journal.id %}" method="POST">
-              {% csrf_token %}
-              <textarea rows="10" cols="60">{{ journal.description }}</textarea>
-          </form>
+            <form action="{% url 'uptime:journal_description_update' journal.id %}" method="POST" id="description-form">
+                 {% csrf_token %}
+                 <textarea rows="10" cols="60" id="description-field" name="description">{{ journal.description }}</textarea>
+            </form>
         </div>
         <div class="col-md-6">
             <h3>Записи событий</h3>
@@ -69,4 +69,20 @@
         <a href="{% url 'uptime:records' journal.id %}" class="btn btn-default active" role="button">Архив записей</a>
     </p>
 {% endblock content %}
+{% block javascript %}
+    <script type="text/javascript">
+  $(document).ready(function() {
+    $("#description-field").change(function(e) {
+      e.preventDefault();
+      f = $("#description-form");
+      $.ajax({
+        data: $(f).serialize(),
+        type: $(f).attr("method"),
+        url: $(f).attr("action")
+      });
+      return false;
+    });
+  });
+    </script>
+{% endblock javascript %}
 

@@ -25,7 +25,6 @@ def show(request, journal_id):
     journal = get_object_or_404(Journal, pk=journal_id)
     record_list = journal.get_last_records(depth=5)
     event_list = journal.events.order_by('-date')[:3]
-    messages.add_message(request, messages.SUCCESS, 'Hello, I am a first message')
     form = EventForm(None)
     context = {
         'journal': journal,
@@ -37,7 +36,11 @@ def show(request, journal_id):
 
 
 def journal_description_update(request, journal_id):
-    pass
+    journal = get_object_or_404(Journal, pk=journal_id)
+    journal.description = request.POST['description']
+    journal.save(update_fields=['description'])
+    messages.add_message(request, messages.SUCCESS, 'Описание успешно обновлено!')
+    return JsonResponse({'status': 0})
 
 
 @permission_required('uptime.create_journal_record',
