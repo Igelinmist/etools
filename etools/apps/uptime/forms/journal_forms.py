@@ -53,7 +53,8 @@ class DownStatRecordForm(BaseRecordForm):
 
 
 class HotReservRecordForm(BaseRecordForm):
-    hrs = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': "([0-9]{1,6}):[0-5][0-9]"}), initial='0:00')
+    form_type = forms.CharField(widget=forms.HiddenInput(attrs={'value': 'hot_rzv_stat'}), required=False)
+    hrs = forms.CharField(widget=forms.TextInput(attrs={'size': 4, 'class': 'interval', 'pattern': "([0-9]{1,6}):[0-5][0-9]"}), initial='0:00', label='ГР')
 
     def __init__(self, *args, **kwargs):
         is_individual = kwargs.pop('is_individual', False)

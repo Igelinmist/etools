@@ -8,9 +8,17 @@
     },
     {
         "model": "uptime.equipment",
-        "pk": 2,
+        "pk": 8,
         "fields": {
             "plant": 1,
+            "name": "SubPlant_1"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 2,
+        "fields": {
+            "plant": 8,
             "name": "Eq-01"
         }
     },
@@ -18,7 +26,7 @@
         "model": "uptime.equipment",
         "pk": 3,
         "fields": {
-            "plant": 1,
+            "plant": 8,
             "name": "Eq-02"
         }
     },
@@ -36,6 +44,22 @@
         "fields": {
             "plant": 3,
             "name": "Detail01"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 6,
+        "fields": {
+            "plant": 1,
+            "name": "SubPlant_2"
+        }
+    },
+    {
+        "model": "uptime.equipment",
+        "pk": 7,
+        "fields": {
+            "plant": 6,
+            "name": "Eq_hr-01"
         }
     },
     {
@@ -68,6 +92,14 @@
         "fields": {
             "equipment": 5,
             "stat_by_parent": true
+        }
+    },
+    {
+        "model": "uptime.journal",
+        "pk": 5,
+        "fields": {
+            "equipment": 7,
+            "hot_rzv_stat": true
         }
     },
     {
@@ -149,10 +181,48 @@
         }
     },
     {
+        "model": "uptime.record",
+        "pk": 5,
+        "fields": {
+            "journal": 5,
+            "rdate": "2016-02-01",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 5,
+        "fields": {
+            "record": 5,
+            "state_code": "wrk",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 6,
+        "fields": {
+            "journal": 5,
+            "rdate": "2016-02-02",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 6,
+        "fields": {
+            "record": 6,
+            "state_code": "hrs",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
         "model": "uptime.report",
         "pk": 1,
         "fields": {
-            "equipment": 1,
+            "equipment": 8,
             "is_generalizing": true,
             "title": "Plant Report"
         }
@@ -209,6 +279,25 @@
             "column_type": "PCN",
             "from_event": "FVZ",
             "weight": 4
+        }
+    },
+    {
+        "model": "uptime.report",
+        "pk": 2,
+        "fields": {
+            "equipment": 6,
+            "is_generalizing": false,
+            "title": "SubPlant HR Report"
+        }
+    },
+    {
+        "model": "uptime.column",
+        "pk": 6,
+        "fields": {
+            "report": 2,
+            "title": "TW",
+            "column_type": "ITV",
+            "from_event": "FVZ"
         }
     }
 ]

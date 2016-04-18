@@ -120,11 +120,11 @@ class EquipmentTestCase(TestCase):
         Can call the Journal method collect_sub_stat_on_date (data for equipment tree)
         Get data for new date (empty data)
         """
-        unit = Equipment.objects.get(pk=1)
+        unit = Equipment.objects.get(pk=8)
         stat = unit.collect_sub_stat_on_date('01.03.2016')
 
         self.assertEquals(stat, [
-            {'name': 'Plant', 'ident': 0, 'form_type': 0},
+            {'name': 'SubPlant_1', 'ident': 0, 'form_type': 0},
             {'name': 'Eq-01',
              'journal_id': 1,
              'ident': 1, 'form_type': B_FORM | DS_FORM,
@@ -134,6 +134,7 @@ class EquipmentTestCase(TestCase):
                 'wrk': '0:00',
                 'up_cnt': 0,
                 'down_cnt': 0,
+                'hrs': '0:00',
                 'rsv': '0:00',
                 'trm': '0:00',
                 'arm': '0:00',
@@ -150,6 +151,7 @@ class EquipmentTestCase(TestCase):
                 'wrk': '0:00',
                 'up_cnt': 0,
                 'down_cnt': 0,
+                'hrs': '0:00',
                 'rsv': '0:00',
                 'trm': '0:00',
                 'arm': '0:00',
@@ -165,11 +167,11 @@ class EquipmentTestCase(TestCase):
         Can call the Journal method collect_sub_stat_on_date (data for equipment tree)
         Get data for date partly with data
         """
-        unit = Equipment.objects.get(pk=1)
+        unit = Equipment.objects.get(pk=8)
         stat = unit.collect_sub_stat_on_date('03.03.2016')
 
         self.assertEquals(stat, [
-            {'name': 'Plant', 'ident': 0, 'form_type': 0},
+            {'name': 'SubPlant_1', 'ident': 0, 'form_type': 0},
             {'name': 'Eq-01',
              'journal_id': 1,
              'ident': 1, 'form_type': B_FORM | DS_FORM,
@@ -179,6 +181,7 @@ class EquipmentTestCase(TestCase):
                 'wrk': '10:00',
                 'up_cnt': 1,
                 'down_cnt': 0,
+                'hrs': '0:00',
                 'rsv': '0:00',
                 'trm': '0:00',
                 'arm': '0:00',
@@ -195,6 +198,7 @@ class EquipmentTestCase(TestCase):
                 'wrk': '0:00',
                 'up_cnt': 0,
                 'down_cnt': 0,
+                'hrs': '0:00',
                 'rsv': '0:00',
                 'trm': '0:00',
                 'arm': '0:00',
@@ -301,4 +305,18 @@ class ReportTestCase(TestCase):
                 ['Оборудование', 'TW', 'Vv/Z', 'FrKR', 'VvKR', 'UpCnt'],
                 ['Eq-01', '82', '-', '34', '02.03.2016', '1'],
                 ['Eq-02', '-', '-', '-', '-', '-']]
+        )
+
+    def test_prepare_report_data_including_hot_reserv(self):
+        """
+        The report_view function Show
+        Can call the Report method 'prepare_report_data'
+        Get data in output array with undefine date scope and hot reserv stat
+        """
+        rep = Report.objects.get(pk=2)
+
+        self.assertEquals(
+            rep.prepare_report_data(), [
+                ['Оборудование', 'TW'],
+                ['Eq_hr-01', '48']]
         )

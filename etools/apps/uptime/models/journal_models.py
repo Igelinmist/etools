@@ -249,7 +249,10 @@ class Journal(models.Model):
             r_set = r_set.filter(rdate__gte=from_date)
         if to_date:
             r_set = r_set.exclude(rdate__gte=to_date)
-        r_set = r_set.filter(intervals__state_code=state_code)
+        if self.hot_rzv_stat and state_code == 'wrk':
+            r_set = r_set.filter(models.Q(intervals__state_code='wrk') | models.Q(intervals__state_code='hrs'))
+        else:
+            r_set = r_set.filter(intervals__state_code=state_code)
         total = r_set.aggregate(models.Sum('intervals__time_in_state'))['intervals__time_in_state__sum']
         return stat_timedelta_for_report(total)
 

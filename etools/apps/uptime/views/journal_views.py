@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 
 from ..models.journal_models import Equipment, Journal, EventItem
-from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, ChooseRecordsDateForm, EventForm
-from ..constants import B_FORM, DS_FORM
+from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, ChooseRecordsDateForm, EventForm, HotReservRecordForm
+from ..constants import B_FORM, DS_FORM, HR_FORM
 from ..utils import yesterday_local, custom_redirect
 
 
@@ -107,6 +107,8 @@ def records_on_date(request):
     for row in data_table:
         if row['form_type'] & DS_FORM:
             row['form_content'] = DownStatRecordForm(row['rec_data'], auto_id=False)
+        elif row['form_type'] & HR_FORM:
+            row['form_content'] = HotReservRecordForm(row['rec_data'], auto_id=False)
         elif row['form_type'] & B_FORM:
             row['form_content'] = BaseRecordForm(row['rec_data'], auto_id=False)
 
@@ -122,6 +124,8 @@ def silent_record_create_or_update(request):
             form = BaseRecordForm(request.POST)
         elif request.POST['form_type'] == 'down_stat':
             form = DownStatRecordForm(request.POST)
+        elif request.POST['form_type'] == 'hot_rzv_stat':
+            form = HotReservRecordForm(request.POST)
         else:
             response = {'status': -2}
             return JsonResponse(response)
