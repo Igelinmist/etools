@@ -1,3 +1,5 @@
+from bitfield import BitField
+from bitfield.forms import BitFieldCheckboxSelectMultiple
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -29,8 +31,14 @@ class ReportAdmin(admin.ModelAdmin):
     ]
     inlines = [ColumnInline]
 
+
+class JournalAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+            BitField: {'widget': BitFieldCheckboxSelectMultiple},
+    }
+
 admin.site.register(Equipment)
-admin.site.register(Journal)
+admin.site.register(Journal, JournalAdmin)
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

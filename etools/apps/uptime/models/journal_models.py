@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime, date
 from django.db import models
+from bitfield import BitField
 
 from ..constants import EVENT_CHOICES, STATE_CHOICES
 from ..constants import RECORD_SET, INTERVAL_SET, B_FORM, DS_FORM, HR_FORM
@@ -18,9 +19,9 @@ class Equipment(models.Model):
     """
     Модель производственных единиц от Предприятия до Детали Оборудования
     """
-    plant = models.ForeignKey('self', blank=True, null=True,
+    plant = models.ForeignKey('self', blank=True, null=True, verbose_name='установка',
                               related_name='parts', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, verbose_name='наименование')
 
     def __str__(self):
         if self.plant is None:
@@ -134,10 +135,24 @@ class Journal(models.Model):
     """
 
     equipment = models.OneToOneField(Equipment, on_delete=models.CASCADE,
-                                     related_name='journal')
-    stat_by_parent = models.BooleanField(default=False)
-    hot_rzv_stat = models.BooleanField(default=False)
-    downtime_stat = models.BooleanField(default=False)
+                                     related_name='journal', verbose_name='Оборудование')
+    stat_by_parent = models.BooleanField(default=False, verbose_name='Статистика по установке')
+    hot_rzv_stat = models.BooleanField(default=False, verbose_name='Статистика горячего резерва')
+    downtime_stat = models.BooleanField(default=False, verbose_name='Статистика простоев')
+    control_flags = BitField(
+        flags=(
+            ('wrk', 'работа'),
+            ('hrs', 'горячий резерв'),
+            ('rsv', 'резерв'),
+            ('arm', 'аварийный ремонт'),
+            ('trm', 'текущий ремонт'),
+            ('krm', 'капитальный ремонт'),
+            ('srm', 'средний ремонт'),
+            ('rcd', 'реконструкция')
+        ),
+        verbose_name='контроль',
+        default=1
+    )
     description = models.TextField(blank=True)
 
     objects = JournalManager()
