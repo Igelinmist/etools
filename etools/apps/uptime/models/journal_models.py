@@ -2,10 +2,8 @@ from datetime import timedelta, datetime, date
 from django.db import models
 from bitfield import BitField
 
-from ..constants import EVENT_CHOICES, STATE_CHOICES
-from ..constants import RECORD_SET, INTERVAL_SET, B_FORM, DS_FORM, HR_FORM
+from ..constants import STATE_FLAGS, EVENT_CHOICES, STATE_CHOICES, STATE_SET
 from ..utils import req_date, stat_timedelta_for_report
-from ..forms.journal_forms import BaseRecordForm, DownStatRecordForm, HotReservRecordForm
 
 
 class EquipmentManager(models.Manager):
@@ -84,7 +82,7 @@ class Equipment(models.Model):
         журналов (на базе дерева оборудования) от указанного узла.
         """
         eq_list = self.unit_tree()
-        # Собрать все номера журналов
+        # Собрать все номера журналов для вычисленного дерева оборудования
         journal_set = {
             eq.journal_id for eq, ident in eq_list
             if eq.journal_id and not eq.journal.stat_by_parent
@@ -99,24 +97,18 @@ class Equipment(models.Model):
                 row['name'] = eq.name
                 row['journal_id'] = eq.journal_id
                 row['ident'] = ident
-                row['form_type'] = B_FORM
-                if eq.journal.downtime_stat:
-                    row['form_type'] = row['form_type'] | DS_FORM
-                if eq.journal.hot_rzv_stat:
-                    row['form_type'] = row['form_type'] | HR_FORM
                 if eq.journal_id in journals_records:
                     row['rec_data'] = journals_records[eq.journal_id].data_dict()
-                    row['has_record'] = True
+                    row['has_data'] = True
                 else:
                     row['rec_data'] = {'rdate': stat_date, 'up_cnt': 0, 'down_cnt': 0}
-                    for state in INTERVAL_SET:
-                        row['rec_data'][state] = '0:00'
-                    row['has_record'] = False
+                    for st_name, st_flag in eq.journal.control_flags:
+                        row['rec_data'][st_name] = '0:00'
+                    row['has_data'] = False
                 res.append(row)
             elif not eq.journal_id:
                 row['name'] = eq.name
                 row['ident'] = ident
-                row['form_type'] = 0
                 res.append(row)
         return res
 
@@ -140,16 +132,7 @@ class Journal(models.Model):
     hot_rzv_stat = models.BooleanField(default=False, verbose_name='Статистика горячего резерва')
     downtime_stat = models.BooleanField(default=False, verbose_name='Статистика простоев')
     control_flags = BitField(
-        flags=(
-            ('wrk', 'работа'),
-            ('hrs', 'горячий резерв'),
-            ('rsv', 'резерв'),
-            ('arm', 'аварийный ремонт'),
-            ('trm', 'текущий ремонт'),
-            ('krm', 'капитальный ремонт'),
-            ('srm', 'средний ремонт'),
-            ('rcd', 'реконструкция')
-        ),
+        flags=STATE_FLAGS,
         verbose_name='контроль',
         default=1
     )
@@ -186,8 +169,8 @@ class Journal(models.Model):
         """
         # Разделяем словарь входных данных на то, что относится к записи
         # и то, что к интревалам
-        rec_keys = rdata.keys() & RECORD_SET
-        interval_keys = rdata.keys() & INTERVAL_SET
+        rec_keys = rdata.keys() & {'rdate', 'down_cnt', 'up_cnt'}
+        interval_keys = rdata.keys() & STATE_SET
         rec_argv = {key: rdata[key] for key in rec_keys}
         # Пробуем найти запись на эту дату
         try:
@@ -349,14 +332,6 @@ class Journal(models.Model):
         else:
             return False
 
-    def recordFormClass(self):
-        if self.downtime_stat:
-            return DownStatRecordForm
-        elif self.hot_rzv_stat:
-            return HotReservRecordForm
-        else:
-            return BaseRecordForm
-
 
 class RecordManager(models.Manager):
 
@@ -431,8 +406,11 @@ class Record(models.Model):
         data['rdate'] = self.rdate.strftime('%d.%m.%Y')
         data['up_cnt'] = self.up_cnt
         data['down_cnt'] = self.down_cnt
-        for state in INTERVAL_SET:
-            data[state] = self.__getattribute__(state)
+        for st_name, st_flag in self.journal.control_flags:
+            if st_flag:
+                data[st_name] = self.__getattribute__(st_name)
+            else:
+                data[st_name] = '0:00'
         return data
 
 

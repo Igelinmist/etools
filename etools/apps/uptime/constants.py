@@ -1,15 +1,3 @@
-
-STATE_CHOICES = (
-    ('wrk', 'Работа'),
-    ('hrs', 'Горячий резерв'),
-    ('rsv', 'Резерв'),
-    ('trm', 'Тек. ремонт'),
-    ('arm', 'Ав. ремонт'),
-    ('krm', 'Кап. ремонт'),
-    ('srm', 'Сред. ремонт'),
-    ('rcd', 'Реконструкция'),
-)
-
 EVENT_CHOICES = (
     ('vkr', 'Ввод из капремонта'),
     ('zmn', 'Ввод после замены'),
@@ -20,15 +8,19 @@ EVENT_CHOICES = (
 )
 EVENT_CHOICES_DICT = dict(EVENT_CHOICES)
 
-RECORD_SET = {'rdate', 'down_cnt', 'up_cnt'}
+# Состояния описываются код, полное имя, короткое имя
+STATE_FLAGS = (
+    ('wrk', 'Работа', 'Работа'),
+    ('hrs', 'Горячий резерв', 'ГР'),
+    ('rsv', 'Резерв', 'РЗ'),
+    ('arm', 'Аварийный ремонт', 'АР'),
+    ('trm', 'Текущий ремонт', 'ТР'),
+    ('krm', 'Капитальный ремонт', 'КР'),
+    ('srm', 'Средний ремонт', 'СР'),
+    ('rcd', 'Реконструкция', 'РК')
+)
 
-INTERVAL_SET = {'wrk', 'hrs', 'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}
-
-EXT_INTERVAL_SET = {'rsv', 'arm', 'trm', 'krm', 'srm', 'rcd'}
-
-# Base record form flag
-B_FORM = 0b0001
-# DownState form flag
-DS_FORM = 0b0010
-# HotReserv form flag
-HR_FORM = 0b0100
+STATE_FNAME = {st[0]: st[1] for st in STATE_FLAGS}
+STATE_SNAME = {st[0]: st[2] for st in STATE_FLAGS}
+STATE_SET = {item[0] for item in STATE_FLAGS}
+STATE_CHOICES = ((item[0], item[1]) for item in STATE_FLAGS)

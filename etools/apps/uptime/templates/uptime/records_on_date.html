@@ -16,13 +16,13 @@
   </form><br />
   {% for data_row in data_table %}
       <div
-        {% if data_row.has_record %}
+        {% if data_row.has_data %}
           class="row has_data"
         {% else %}
           class="row"
         {% endif %}
       >
-      {% if data_row.form_type %}
+      {% if data_row.journal_id %}
             <div class="col-md-12 {% cycle 'bg-success' 'bg-warning' %}">
             <div class="col-md-2"><a href="{%url 'uptime:show' data_row.journal_id%}"><strong>{{ data_row.ident|make_ident }}{{ data_row.name }}</strong></a></div>
              <div class="col-md-10">
@@ -30,7 +30,7 @@
             {% csrf_token %}
             <input type="hidden" name="journal_id" value="{{data_row.journal_id}}">
             {{data_row.form_content}}
-            {% if data_row.has_record %}
+            {% if data_row.has_data %}
               <input type="hidden" class="has_record" value="1" />
             {% else %}
               <input type="hidden" class="has_record" value="0" />

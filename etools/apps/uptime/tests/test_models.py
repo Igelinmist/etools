@@ -3,7 +3,6 @@ from datetime import date, timedelta
 
 from uptime.models.journal_models import Equipment, Journal
 from uptime.models.report_models import Report
-from uptime.constants import B_FORM, DS_FORM
 
 
 class JournalTestCase(TestCase):
@@ -124,11 +123,11 @@ class EquipmentTestCase(TestCase):
         stat = unit.collect_sub_stat_on_date('01.03.2016')
 
         self.assertEquals(stat, [
-            {'name': 'SubPlant_1', 'ident': 0, 'form_type': 0},
+            {'name': 'SubPlant_1', 'ident': 0},
             {'name': 'Eq-01',
              'journal_id': 1,
-             'ident': 1, 'form_type': B_FORM | DS_FORM,
-             'has_record': False,
+             'ident': 1,
+             'has_data': False,
              'rec_data': {
                 'rdate': '01.03.2016',
                 'wrk': '0:00',
@@ -144,8 +143,8 @@ class EquipmentTestCase(TestCase):
               }},
             {'name': 'Eq-02',
              'journal_id': 2,
-             'ident': 1, 'form_type': B_FORM | DS_FORM,
-             'has_record': False,
+             'ident': 1,
+             'has_data': False,
              'rec_data': {
                 'rdate': '01.03.2016',
                 'wrk': '0:00',
@@ -171,11 +170,11 @@ class EquipmentTestCase(TestCase):
         stat = unit.collect_sub_stat_on_date('03.03.2016')
 
         self.assertEquals(stat, [
-            {'name': 'SubPlant_1', 'ident': 0, 'form_type': 0},
+            {'name': 'SubPlant_1', 'ident': 0},
             {'name': 'Eq-01',
              'journal_id': 1,
-             'ident': 1, 'form_type': B_FORM | DS_FORM,
-             'has_record': True,
+             'ident': 1,
+             'has_data': True,
              'rec_data': {
                 'rdate': '03.03.2016',
                 'wrk': '10:00',
@@ -191,8 +190,8 @@ class EquipmentTestCase(TestCase):
               }},
             {'name': 'Eq-02',
              'journal_id': 2,
-             'ident': 1, 'form_type': B_FORM | DS_FORM,
-             'has_record': False,
+             'ident': 1,
+             'has_data': False,
              'rec_data': {
                 'rdate': '03.03.2016',
                 'wrk': '0:00',
