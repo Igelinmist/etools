@@ -63,6 +63,7 @@ class RecordForm(forms.Form):
                 if st_flag:
                     self.fields[st_name] = forms.CharField(
                         widget=forms.TextInput(attrs={'size': 4, 'class': 'interval',
-                                                      'pattern': '([0-9]{1,6}):[0-5][0-9]'}),
+                                                      'pattern': '([0-9]{1,6}):[0-5][0-9]',
+                                                      'title': journal.control_flags.get_label(st_name)}),
                         initial=time_in_state[st_name] if time_in_state[st_name] else '0:00',
                         label=STATE_SNAME[st_name])
