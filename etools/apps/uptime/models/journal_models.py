@@ -129,8 +129,6 @@ class Journal(models.Model):
     equipment = models.OneToOneField(Equipment, on_delete=models.CASCADE,
                                      related_name='journal', verbose_name='Оборудование')
     stat_by_parent = models.BooleanField(default=False, verbose_name='Статистика по установке')
-    hot_rzv_stat = models.BooleanField(default=False, verbose_name='Статистика горячего резерва')
-    downtime_stat = models.BooleanField(default=False, verbose_name='Статистика простоев')
     control_flags = BitField(
         flags=STATE_FLAGS,
         verbose_name='контроль',
@@ -247,7 +245,8 @@ class Journal(models.Model):
             r_set = r_set.filter(rdate__gte=from_date)
         if to_date:
             r_set = r_set.exclude(rdate__gte=to_date)
-        if self.hot_rzv_stat and state_code == 'wrk':
+        # По техническому заданию горячий резерв суммируется к работе
+        if state_code == 'wrk':
             r_set = r_set.filter(models.Q(intervals__state_code='wrk') | models.Q(intervals__state_code='hrs'))
         else:
             r_set = r_set.filter(intervals__state_code=state_code)
@@ -332,11 +331,49 @@ class Journal(models.Model):
         else:
             return False
 
+    @property
+    def state_cnt(self):
+        return sum(1 for _ in filter(lambda x: x[1], self.control_flags))
+        # return len(tuple(filter(lambda x: x[1], self.control_flags)))
+
 
 class RecordManager(models.Manager):
 
     def get_queryset(self):
         return super(RecordManager, self).get_queryset().prefetch_related('intervals')
+
+
+class StateDescriptor:
+
+    def __init__(self, state_code):
+        self.state_code = state_code
+
+    def __get__(self, instance, owner):
+        try:
+            for interval in instance._prefetched_objects_cache['intervals']:
+                if interval.state_code == self.state_code:
+                    return interval.stat_time
+        except (AttributeError, KeyError):
+            q_set = instance.intervals.filter(state_code=self.state_code)
+            if q_set.exists():
+                return q_set[0].stat_time
+            else:
+                return '0:00'
+        return '0:00'
+
+    def __set__(self, instance, value):
+        if isinstance(value, str):
+            try:
+                hr, mnt = value.split(':')
+                interval = timedelta(hours=int(hr), minutes=int(mnt))
+            except ValueError:
+                return 'Bad value for timedelta'
+        elif isinstance(value, timedelta):
+            interval = value
+        else:
+            return 'Bad value for timedelta'
+        if interval != timedelta(0):
+            instance.intervals.create(state_code=self.state_code, time_in_state=interval)
 
 
 class Record(models.Model):
@@ -354,48 +391,6 @@ class Record(models.Model):
 
     class Meta:
         db_table = 'records'
-        # unique_together = ('journal', 'rdate')
-
-    class StateDescriptor:
-
-        def __init__(self, state_code):
-            self.state_code = state_code
-
-        def __get__(self, instance, owner):
-            try:
-                for interval in instance._prefetched_objects_cache['intervals']:
-                    if interval.state_code == self.state_code:
-                        return interval.stat_time
-            except (AttributeError, KeyError):
-                q_set = instance.intervals.filter(state_code=self.state_code)
-                if q_set.exists():
-                    return q_set[0].stat_time
-                else:
-                    return '0:00'
-            return '0:00'
-
-        def __set__(self, instance, value):
-            if isinstance(value, str):
-                try:
-                    hr, mnt = value.split(':')
-                    interval = timedelta(hours=int(hr), minutes=int(mnt))
-                except ValueError:
-                    return 'Bad value for timedelta'
-            elif isinstance(value, timedelta):
-                interval = value
-            else:
-                return 'Bad value for timedelta'
-            if interval != timedelta(0):
-                instance.intervals.create(state_code=self.state_code, time_in_state=interval)
-
-    wrk = StateDescriptor('wrk')
-    hrs = StateDescriptor('hrs')
-    rsv = StateDescriptor('rsv')
-    trm = StateDescriptor('trm')
-    arm = StateDescriptor('arm')
-    krm = StateDescriptor('krm')
-    srm = StateDescriptor('srm')
-    rcd = StateDescriptor('rcd')
 
     def data_dict(self):
         """
@@ -412,6 +407,11 @@ class Record(models.Model):
             else:
                 data[st_name] = '0:00'
         return data
+
+# Добавление динамических атрибутов для класса Record для обращения по имени состояния
+# Добавим новые состояния - изменится состав атрибутов
+for state_name in STATE_SET:
+    setattr(Record, state_name, StateDescriptor(state_name))
 
 
 class IntervalItem(models.Model):

@@ -33,3 +33,13 @@ def human_event(event_code):
 @register.filter()
 def key(d, key_name):
     return d[key_name]
+
+
+@register.filter()
+def state_verbose_name(journal, flag):
+    return journal.control_flags.get_label(flag)
+
+
+@register.filter()
+def state_value(record, flag):
+    return record.__getattribute__(flag)

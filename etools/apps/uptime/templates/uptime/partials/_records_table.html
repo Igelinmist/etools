@@ -1,0 +1,32 @@
+{% load uptime_extras %}
+<table class="table table-condensed">
+  <tr>
+    <th class="text-center" rowspan="2">Дата</th>
+    <th class="text-center" rowspan="2">Остановы</th>
+    <th class="text-center" rowspan="2">Пуски</th>
+    <th class="text-center" colspan="{{ journal.state_cnt }}">Состояния</th>
+    <th class="text-center" rowspan="2"></th>
+  </tr>
+  <tr>
+    {% for f in journal.control_flags %}
+      {% if f.1 %}
+        <th class="text-center">{{ journal|state_verbose_name:f.0 }}</th>
+      {% endif %}
+    {% endfor %}
+  </tr>
+  {% for rec in record_list %}
+  <tr>
+    <td class="text-center">{{ rec.rdate|date:"d.m.Y" }}</td>
+    <td class="text-center">{{ rec.down_cnt }}</td>
+    <td class="text-center">{{ rec.up_cnt }}</td>
+    {% for f in journal.control_flags %}
+      {% if f.1 %}
+        <td class="text-center">{{ rec|state_value:f.0 }}</td>
+      {% endif %}
+    {% endfor %}
+    <td>
+      {% include "uptime/partials/_records_actions.html" %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>

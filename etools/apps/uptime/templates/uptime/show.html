@@ -10,13 +10,8 @@
 
 {% block content %}
     <h2>Последние записи статистики <strong>{{ journal }}</strong></h2>
-    {% if journal.downtime_stat %}
-        {% include "uptime/partials/_records_base_and_downtime.html" %}
-    {% elif journal.hot_rzv_stat %}
-        {% include "uptime/partials/_records_base_and_hotreserv.html" %}
-    {% else %}
-        {% include "uptime/partials/_records_base.html" %}
-    {% endif %}
+
+    {% include "uptime/partials/_records_table.html" %}
 
     {% if not journal.stat_by_parent and perms.uptime.create_journal_record%}
         <a href="{% url 'uptime:record_new' journal.id %}" class="btn btn-primary">Добавить запись</a><br />

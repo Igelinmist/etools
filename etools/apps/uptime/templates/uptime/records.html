@@ -37,13 +37,7 @@
             {% endif %}
         </ul>
     </nav>
-    {% if journal.downtime_stat %}
-        {% include "uptime/partials/_records_base_and_downtime.html" %}
-    {% elif journal.hot_rzv_stat %}
-        {% include "uptime/partials/_records_base_and_hotreserv.html" %}
-    {% else %}
-        {% include "uptime/partials/_records_base.html" %}
-    {% endif %}
+    {% include "uptime/partials/_records_table.html" %}
     <nav>
         <ul class="pagination">
             {% if record_list.has_previous %}
