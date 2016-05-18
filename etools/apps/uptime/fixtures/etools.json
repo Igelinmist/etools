@@ -67,7 +67,7 @@
         "pk": 1,
         "fields": {
             "equipment": 2,
-            "downtime_stat": true
+            "control_flags": 253
         }
     },
     {
@@ -75,7 +75,7 @@
         "pk": 2,
         "fields": {
             "equipment": 3,
-            "downtime_stat": true
+            "control_flags": 253
         }
     },
     {
@@ -99,7 +99,7 @@
         "pk": 5,
         "fields": {
             "equipment": 7,
-            "hot_rzv_stat": true
+            "control_flags": 3
         }
     },
     {

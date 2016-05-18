@@ -2,6 +2,7 @@ from collections import namedtuple
 from datetime import date, timedelta, datetime
 
 import psycopg2
+import pyodbc
 from django.db import models
 from django.conf import settings
 
@@ -11,7 +12,7 @@ from pcs.constants import PERMISSIBLE_PREC
 Hist = namedtuple('Hist', ['dt', 'v'])
 
 
-class PCS():
+class DBSource():
 
     def __init__(self, db_host, db_port, db_user, db_pwd):
         self.db_host = db_host
@@ -19,16 +20,19 @@ class PCS():
         self.db_user = db_user
         self.db_pwd = db_pwd
 
+    def close(self):
+        self.conn.commit()
+        self.cur.close()
+        self.conn.close()
+
+
+class PCS(DBSource):
+
     def open(self):
         conn_str = 'host=%s port=%s user=%s password=%s dbname=fdata' % (
             self.db_host, self.db_port, self.db_user, self.db_pwd)
         self.conn = psycopg2.connect(conn_str)
         self.cur = self.conn.cursor()
-
-    def close(self):
-        self.conn.commit()
-        self.cur.close()
-        self.conn.close()
 
     def get_params(self):
         self.cur.execute('SELECT * FROM params;')
@@ -51,6 +55,20 @@ pcs_source = PCS(
     db_user=settings.PCS_DATABASE['USER'],
     db_pwd=settings.PCS_DATABASE['PWD'],
     )
+
+
+class PiramidaInterface(DBSource):
+    """
+    Description: Класс для получения данных из комплекса Piramida2000
+    """
+
+    def open(self):
+        conn_str = '''DRIVER=FreeTDS;SERVER=%s;PORT=%s;
+                      DATABASE=Piramida2000;UID=%s;PWD=%s;
+                      TDS_Version=8.0;ClientCharset=UTF8;''' % (
+            self.db_host, self.db_port, self.db_user, self.db_pwd)
+        self.conn = pyodbc.connect(conn_str)
+        self.cur = self.conn.cursor()
 
 
 class Param(models.Model):

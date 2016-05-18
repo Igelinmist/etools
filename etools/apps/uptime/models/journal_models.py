@@ -334,7 +334,6 @@ class Journal(models.Model):
     @property
     def state_cnt(self):
         return sum(1 for _ in filter(lambda x: x[1], self.control_flags))
-        # return len(tuple(filter(lambda x: x[1], self.control_flags)))
 
 
 class RecordManager(models.Manager):

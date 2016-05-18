@@ -9,7 +9,7 @@ class JournalTestCase(TestCase):
 
     def setUp(self):
         eq = Equipment.objects.create(name='Test equipment')
-        Journal.objects.create(equipment=eq, downtime_stat=True)
+        Journal.objects.create(equipment=eq, control_flags=253)
 
     def test_journal_can_add_record(self):
         journal = Journal.objects.all()[0]
@@ -140,6 +140,7 @@ class EquipmentTestCase(TestCase):
                 'krm': '0:00',
                 'srm': '0:00',
                 'rcd': '0:00',
+                'ksv': '0:00',
               }},
             {'name': 'Eq-02',
              'journal_id': 2,
@@ -157,6 +158,7 @@ class EquipmentTestCase(TestCase):
                 'krm': '0:00',
                 'srm': '0:00',
                 'rcd': '0:00',
+                'ksv': '0:00',
              }}, ]
         )
 
@@ -187,6 +189,7 @@ class EquipmentTestCase(TestCase):
                 'krm': '0:00',
                 'srm': '0:00',
                 'rcd': '0:00',
+                'ksv': '0:00',
               }},
             {'name': 'Eq-02',
              'journal_id': 2,
@@ -204,6 +207,7 @@ class EquipmentTestCase(TestCase):
                 'krm': '0:00',
                 'srm': '0:00',
                 'rcd': '0:00',
+                'ksv': '0:00',
              }}, ]
         )
 

@@ -8,6 +8,7 @@ whitenoise==2.0.4
 
 # For the persistence stores
 psycopg2==2.6.1
+pyodbc==3.0.10
 
 # Unicode slugification
 unicode-slugify==0.1.3
