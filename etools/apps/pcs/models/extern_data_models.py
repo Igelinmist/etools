@@ -34,30 +34,30 @@ class PCS(DBSource):
         self.conn = psycopg2.connect(conn_str)
         self.cur = self.conn.cursor()
 
-    def get_params(self):
+    def _get_params(self):
+        """ Description: Return the list of Param objects which have not been saved in DB """
+        self.open()
         self.cur.execute('SELECT * FROM params;')
-        return self.cur.fetchall()
+        res = [Param(prmnum=p[0], prmname=p[2], ms_accronim=p[1], mesunit=p[8],) for p in self.cur.fetchall()]
+        self.close()
+        return res
 
-    def _hist_data_set(self, hist_tbl, prmnum, dttm_from, dttm_to):
-        """ Auxiliary method for getting historical data. """
-
+    def _hist_data(self, hist_tbl, prmnum, dttm_from, dttm_to):
+        """ Description: Return list of historical data in Hist format """
+        self.open()
+        res = []
         sql_str = """SELECT dttm, value
                      FROM %s
                      WHERE prmnum = %s AND dttm BETWEEN \'%s\' AND \'%s\'
                      ORDER BY dttm;""" % (hist_tbl, prmnum, dttm_from, dttm_to)
         self.cur.execute(sql_str)
-
-        return self.cur.fetchall()
-
-pcs_source = PCS(
-    db_host=settings.PCS_DATABASE['HOST'],
-    db_port=settings.PCS_DATABASE['PORT'],
-    db_user=settings.PCS_DATABASE['USER'],
-    db_pwd=settings.PCS_DATABASE['PWD'],
-    )
+        for item in self.cur.fetchall():
+            res.append(Hist(item[0], item[1]))
+        self.close()
+        return res
 
 
-class PiramidaInterface(DBSource):
+class Piramida(DBSource):
     """
     Description: Класс для получения данных из комплекса Piramida2000
     """
@@ -89,13 +89,6 @@ class Param(models.Model):
     def __str__(self):
         return "%s [%s:%s]" % (self.prmname, self.ms_accronim, self.prmnum)
 
-    def load_params():
-        pcs_source.open()
-        dataset = pcs_source.get_params()
-        prm_list = [Param(prmnum=p[0], prmname=p[2], ms_accronim=p[1], mesunit=p[8],) for p in dataset]
-        Param.objects.bulk_create(prm_list)
-        pcs_source.close()
-
     def get_hist_data(self, dttm_from=date.today() - timedelta(1), dttm_to=date.today()):
 
         def _get_hr_dist(dttm):
@@ -110,9 +103,7 @@ class Param(models.Model):
                 return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0)
             else:
                 return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0) + timedelta(hours=1)
-
-        pcs_source.open()
-        d_set = pcs_source._hist_data_set('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
+        d_list = pcs_source._hist_data('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
 
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname, }
@@ -121,28 +112,39 @@ class Param(models.Model):
         # the data on the edge of hour
         res['ctrl_h'] = {}
         previous_mes = {}
-        for item in d_set:
-            if not (PERMISSIBLE_PREC < item[0].minute < (60 - PERMISSIBLE_PREC)):
+        for item in d_list:
+            if not (PERMISSIBLE_PREC < item.dt.minute < (60 - PERMISSIBLE_PREC)):
                 # замеры подходят для привязки к часу
                 # нужно выделить наиболее близкое значение к началу часа
-                ctrl_hour = _round_hr(item[0])
+                ctrl_hour = _round_hr(item.dt)
                 if previous_mes:
-                    if previous_mes['appr'] > _get_hr_dist(item[0]):
+                    if previous_mes['appr'] > _get_hr_dist(item.dt):
                         # все еще приближаемся к началу часа
-                        previous_mes['mes'] = (item[0], item[1])
-                        previous_mes['appr'] = _get_hr_dist(item[0])
+                        previous_mes['mes'] = (item.dt, item.v)
+                        previous_mes['appr'] = _get_hr_dist(item.dt)
                         # заменяем значение замера в начале часа
-                        res['ctrl_h'][ctrl_hour] = Hist(item[0], item[1])
+                        res['ctrl_h'][ctrl_hour] = item
                     else:
                         # начали удаляться
                         # сбрасываем previous_mes
                         previous_mes = {}
                 else:
                     # предыдущего замера не было
-                    previous_mes['mes'] = (item[0], item[1])
-                    previous_mes['appr'] = _get_hr_dist(item[0])
+                    previous_mes['mes'] = (item.dt, item.v)
+                    previous_mes['appr'] = _get_hr_dist(item.dt)
                     # заменяем значение замера в начале часа
-                    res['ctrl_h'][ctrl_hour] = Hist(item[0], item[1])
-            res['data'].append(Hist(item[0], item[1]))
-        pcs_source.close()
+                    res['ctrl_h'][ctrl_hour] = Hist(item.dt, item.v)
+            res['data'].append(Hist(item.dt, item.v))
         return res
+
+
+pcs_source = PCS(
+    db_host=settings.PCS_DATABASE['HOST'],
+    db_port=settings.PCS_DATABASE['PORT'],
+    db_user=settings.PCS_DATABASE['USER'],
+    db_pwd=settings.PCS_DATABASE['PWD'],
+    )
+
+
+def load_params():
+    Param.objects.bulk_create(pcs_source._get_params())

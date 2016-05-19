@@ -1,13 +1,14 @@
 from datetime import date, datetime, timedelta, time
 from django.test import TestCase
 
-from pcs.models.extern_data_models import Param
+from pcs.models.extern_data_models import Param, load_params
+from pcs.utils import AddrCoder
 
 
 class ParamTestCase(TestCase):
 
     def setUp(self):
-        Param.load_params()
+        load_params()
 
     def test_getting_params(self):
         """ test params load from external db"""
@@ -37,3 +38,18 @@ class ParamTestCase(TestCase):
 
         self.assertGreater(len(hist_data_hr), 0)
         self.assertEqual(from_dttm + timedelta(hours=1) in hist_data_hr, True)
+
+
+class AddrCoderTestCase(TestCase):
+
+    def test_encode_addr(self):
+        coder = AddrCoder
+        flat_addr = coder.encode_addr(1, 0x1141, 96)
+
+        self.assertEqual(flat_addr, 0x01114160)
+
+    def test_decode_addr(self):
+        coder = AddrCoder
+        syst, ctrl, chan = coder.decode_addr(0x01114160)
+
+        self.assertEqual((syst, ctrl, chan), (1, 4417, 96))
