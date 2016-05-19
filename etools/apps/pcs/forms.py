@@ -6,7 +6,9 @@ from pcs.models.extern_data_models import Param
 from pcs.models.report_models import Report
 from pcs.models.report_models import Band
 
-param_choices = [(None, '----'), ] + [(p.prmnum, p.__str__()) for p in Param.objects.all().order_by('prmnum')]
+
+def param_choices():
+    return [(None, '----'), ] + [(p.prmnum, p.__str__()) for p in Param.objects.all().order_by('prmnum')]
 
 
 class BandForm(forms.ModelForm):
@@ -34,13 +36,16 @@ class BandForm(forms.ModelForm):
             "class": 'prmsets', }),
         required=False,
     )
-    param_num = forms.ChoiceField(
-        label='Параметр',
-        choices=param_choices,
-        widget=forms.Select(
-            attrs={"class": 'prmchoice', }
+
+    def __init__(self, *args, **kwargs):
+        super(BandForm, self).__init__(*args, **kwargs)
+        self.fields['param_num'] = forms.ChoiceField(
+            label='Параметр',
+            choices=param_choices(),
+            widget=forms.Select(
+                attrs={"class": 'prmchoice', }
+            )
         )
-    )
 
     class Meta:
         model = Band

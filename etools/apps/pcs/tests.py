@@ -52,4 +52,4 @@ class AddrCoderTestCase(TestCase):
         coder = AddrCoder
         syst, ctrl, chan = coder.decode_addr(0x01114160)
 
-        self.assertEqual((syst, ctrl, chan), (1, 4417, 96))
+        self.assertEqual((syst, ctrl, chan), (0x01, 0x1141, 0x60))

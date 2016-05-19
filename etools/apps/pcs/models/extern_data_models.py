@@ -79,6 +79,7 @@ class Param(models.Model):
     prmname = models.CharField(max_length=70)
     ms_accronim = models.CharField(max_length=15)
     mesunit = models.CharField(max_length=10, null=True)
+    enh_addr = models.IntegerField(blank=True, null=True)  # flat address for relative data from other systems
 
     class Meta:
         verbose_name = 'параметр'
