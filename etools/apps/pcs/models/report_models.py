@@ -39,24 +39,47 @@ class Report(models.Model):
         }
         if dtfrom > dtto:
             return res
-        else:
+        if self.rtype == 'hs':
+            #  Округление до часа
             dttemp = datetime(dtfrom.year, dtfrom.month, dtfrom.day, dtfrom.hour)
             if dttemp == dtfrom:
                 res['rtitles'].append(dttemp)
+            #  Заполнение заголовков
             while dttemp <= dtto:
                 dttemp += timedelta(hours=1)
                 if dttemp <= dtto:
                     res['rtitles'].append(dttemp)
-        for band in self.bands.all():
-            prm = Param.objects.get(pk=band.param_num)
-            hist_data = prm.get_hist_data(dtfrom, dtto)
-            hrow = []
-            for tm in res['rtitles']:
-                tv = hist_data['ctrl_h'].get(tm, '-')
-                if tv != '-':
-                    tv = tv.v
-                hrow.append(tv)
-            res['content'].append([band.name, ] + hrow)
+            for band in self.bands.all():
+                prm = Param.objects.get(pk=band.param_num)
+                hist_data = prm.get_slice_data(dtfrom, dtto)
+                hrow = []
+                for tm in res['rtitles']:
+                    tv = hist_data['ctrl_tm'].get(tm, '-')
+                    if tv != '-':
+                        tv = tv.v
+                    hrow.append(tv)
+                res['content'].append([band.name, ] + hrow)
+        elif self.rtype == 'ahh':
+            #  Округление до получаса
+            minute = 0 if dtfrom.minute < 30 else 30
+            dttemp = datetime(dtfrom.year, dtfrom.month, dtfrom.day, dtfrom.hour, minute)
+            if minute == 0:
+                dttemp += timedelta(hours=1)
+            #  Заполнение заголовков
+            while dttemp <= dtto:
+                dttemp += timedelta(minutes=30)
+                if dttemp <= dtto:
+                    res['rtitles'].append(dttemp)
+            for band in self.bands.all():
+                prm = Param.objects.get(pk=band.param_num)
+                hist_data = prm.get_30p_data(dtfrom, dtto)
+                hrow = []
+                for tm in res['rtitles']:
+                    tv = hist_data['ctrl_tm'].get(tm, '-')
+                    if tv != '-':
+                        tv = tv.v
+                    hrow.append(tv)
+                res['content'].append([band.name, ] + hrow)
         return res
 
 

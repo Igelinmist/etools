@@ -7,6 +7,7 @@ from django.db import models
 from django.conf import settings
 
 from pcs.constants import PERMISSIBLE_PREC
+from pcs.utils import AddrCoder
 
 
 Hist = namedtuple('Hist', ['dt', 'v'])
@@ -70,16 +71,33 @@ class Piramida(DBSource):
         self.conn = pyodbc.connect(conn_str)
         self.cur = self.conn.cursor()
 
+    def _30p_data(self, enh_addr, dttm_from, dttm_to):
+        res = {}
+        self.open()
+        syst, ctrl, chan = AddrCoder.decode_addr(enh_addr)
+        sql_str = """exec sp_executesql
+            N'SELECT Data_date, Value0 FROM Data
+            WHERE (ParNumber=12)
+                AND (DATA_DATE > @DTF) AND (DATA_DATE < @DTT)
+                AND (Object=@PO) AND (Item=@PI) AND (ObjType=0)',
+            N'@DTF DATETIME, @DTT DATETIME, @PO INT, @PI INT',
+                '{}', '{}', {}, {};""".format(dttm_from, dttm_to, ctrl, chan)
+        self.cur.execute(sql_str)
+        for item in self.cur.fetchall():
+            res[item[0]] = item[1]
+        self.close()
+        return res
+
 
 class Param(models.Model):
     """
     Description: Отображение параметра из таблицы params fdata
     """
-    prmnum = models.IntegerField(primary_key=True)
-    prmname = models.CharField(max_length=70)
-    ms_accronim = models.CharField(max_length=15)
-    mesunit = models.CharField(max_length=10, null=True)
-    enh_addr = models.IntegerField(blank=True, null=True)  # flat address for relative data from other systems
+    prmnum = models.IntegerField(primary_key=True, verbose_name='Номер')
+    prmname = models.CharField(max_length=70, verbose_name='Имя')
+    ms_accronim = models.CharField(max_length=15, verbose_name='Код набора')
+    mesunit = models.CharField(max_length=10, null=True, verbose_name='Единицы изм.')
+    enh_addr = models.IntegerField(blank=True, null=True, verbose_name='Адрес замещения')
 
     class Meta:
         verbose_name = 'параметр'
@@ -90,7 +108,7 @@ class Param(models.Model):
     def __str__(self):
         return "%s [%s:%s]" % (self.prmname, self.ms_accronim, self.prmnum)
 
-    def get_hist_data(self, dttm_from=date.today() - timedelta(1), dttm_to=date.today()):
+    def get_slice_data(self, dttm_from=date.today() - timedelta(1), dttm_to=date.today()):
 
         def _get_hr_dist(dttm):
             if dttm.minute < 30:
@@ -108,10 +126,8 @@ class Param(models.Model):
 
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname, }
-        # all the data returned by query
-        res['data'] = []
         # the data on the edge of hour
-        res['ctrl_h'] = {}
+        res['ctrl_tm'] = {}
         previous_mes = {}
         for item in d_list:
             if not (PERMISSIBLE_PREC < item.dt.minute < (60 - PERMISSIBLE_PREC)):
@@ -124,7 +140,7 @@ class Param(models.Model):
                         previous_mes['mes'] = (item.dt, item.v)
                         previous_mes['appr'] = _get_hr_dist(item.dt)
                         # заменяем значение замера в начале часа
-                        res['ctrl_h'][ctrl_hour] = item
+                        res['ctrl_tm'][ctrl_hour] = item
                     else:
                         # начали удаляться
                         # сбрасываем previous_mes
@@ -134,16 +150,53 @@ class Param(models.Model):
                     previous_mes['mes'] = (item.dt, item.v)
                     previous_mes['appr'] = _get_hr_dist(item.dt)
                     # заменяем значение замера в начале часа
-                    res['ctrl_h'][ctrl_hour] = Hist(item.dt, item.v)
-            res['data'].append(Hist(item.dt, item.v))
+                    res['ctrl_tm'][ctrl_hour] = Hist(item.dt, item.v)
         return res
 
+    def get_30p_data(self, dttm_from=date.today() - timedelta(1), dttm_to=date.today()):
+
+        def _round_tm_30_up(dttm):
+            if dttm.minute < 30:
+                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 30)
+            else:
+                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour) + timedelta(hours=1)
+
+        d_list = pcs_source._hist_data('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
+        askue_dict = askue_source._30p_data(self.enh_addr, dttm_from, dttm_to)
+        res = {'prm_num': self.prmnum,
+               'prm_name': self.prmname, }
+        res['ctrl_tm'] = {}
+        tmp_stor = {'cnt': 0, 'val': 0}
+        tmp_tm = _round_tm_30_up(dttm_from)
+        for item in d_list:
+            if item.dt <= tmp_tm:
+                tmp_stor['cnt'] += 1
+                tmp_stor['val'] += item.v
+            else:
+                if tmp_stor['cnt'] > 0:
+                    sval = '{: .0f}</br>-------</br>{: .0f}'.format(
+                        (tmp_stor['val'] / tmp_stor['cnt'])*1000, askue_dict.get(tmp_tm, 0))
+                    res['ctrl_tm'][tmp_tm] = Hist(tmp_tm, sval)
+                tmp_tm = _round_tm_30_up(item.dt)
+                tmp_stor['cnt'] = 1
+                tmp_stor['val'] = item.v
+        sval = '{: .0f}</br>-------</br>{: .0f}'.format(
+            (tmp_stor['val'] / tmp_stor['cnt'])*1000, askue_dict.get(tmp_tm, 0))
+        res['ctrl_tm'][tmp_tm] = Hist(tmp_tm, sval)
+        # res['ctrl_tm'][tmp_tm] = Hist(tmp_tm, round((tmp_stor['val'] / tmp_stor['cnt']) * 1000))
+        return res
 
 pcs_source = PCS(
     db_host=settings.PCS_DATABASE['HOST'],
     db_port=settings.PCS_DATABASE['PORT'],
     db_user=settings.PCS_DATABASE['USER'],
     db_pwd=settings.PCS_DATABASE['PWD'],
+    )
+askue_source = Piramida(
+    db_host=settings.ASKUE_DATABASE['HOST'],
+    db_port=settings.ASKUE_DATABASE['PORT'],
+    db_user=settings.ASKUE_DATABASE['USER'],
+    db_pwd=settings.ASKUE_DATABASE['PWD'],
     )
 
 

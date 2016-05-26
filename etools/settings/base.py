@@ -146,6 +146,13 @@ PCS_DATABASE = {
     'PWD': 'CHANGE_IT_IN_PRODUCTION!',
 }
 
+ASKUE_DATABASE = {
+    'HOST': 'CHANGE_IT_IN_PRODUCTION!',
+    'PORT': 'CHANGE_IT_IN_PRODUCTION!',
+    'USER': 'CHANGE_IT_IN_PRODUCTION!',
+    'PWD': 'CHANGE_IT_IN_PRODUCTION!',
+}
+
 # .local.py overrides all the common settings.
 try:
     from .local import *

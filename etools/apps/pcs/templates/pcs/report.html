@@ -13,7 +13,7 @@
             {% for row in tbl.content %}
                 <tr>
                     {% for cel in row %}
-                        <td>{{ cel }}</td>
+                        <td>{% autoescape off %}{{ cel }}{% endautoescape %}</td>
                     {% endfor %}
                 </tr>
             {% endfor %}

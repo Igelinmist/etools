@@ -62,6 +62,7 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">МИК <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li><a href="{% url 'pcs:reports' %}?rtype=hs">Часовые замеры</a></li>
+                  <li><a href="{% url 'pcs:reports' %}?rtype=ahh">Сравнение с АИИС КУЭ</a></li>
                 </ul>
               </li>
               {% if user.is_authenticated and user.is_superuser or user.is_staff %}

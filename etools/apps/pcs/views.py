@@ -37,9 +37,12 @@ def report_form(request):
 
 # JSON отклик со списком параметров для ограниченного ms_accronim
 def find_params(request):
-    if request.GET.get('param_set'):
+    if request.GET.get('param_set', None):
         param_set = request.GET.get('param_set')
         qs = {p.prmnum: p.__str__() for p in Param.objects.filter(ms_accronim=param_set).order_by('prmnum')}
+    elif request.GET.get('rtype', None) == 'ahh':
+        # 16777216 = 0x01000000 - флаг системы АИИС КУЭ
+        qs = {p.prmnum: p.__str__() for p in Param.objects.extra(where=['enh_addr & 16777216 <> 0']).order_by('prmnum')}
     else:
         qs = {p.prmnum: p.__str__() for p in Param.objects.all()}
     return JsonResponse(qs)

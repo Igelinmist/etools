@@ -1,7 +1,8 @@
 from django.contrib import admin
 
-from .models.report_models import Report, Band
-from .forms import BandForm
+from pcs.models.report_models import Report, Band
+from pcs.models.extern_data_models import Param
+from pcs.forms import BandForm
 
 
 # class BandAdmin(admin.ModelAdmin):
@@ -23,5 +24,6 @@ class ReportAdmin(admin.ModelAdmin):
     ]
     inlines = [BandInline]
 
+admin.site.register(Param)
 admin.site.register(Report, ReportAdmin)
 # admin.site.register(Band, BandAdmin)
