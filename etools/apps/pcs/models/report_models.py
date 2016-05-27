@@ -1,7 +1,8 @@
 from django.db import models
 from datetime import datetime, timedelta
 
-from .extern_data_models import Param
+from pcs.models.extern_data_models import Param
+from pcs.utils import round_tm_30_up
 
 
 REPORT_TYPES = (
@@ -60,19 +61,16 @@ class Report(models.Model):
                     hrow.append(tv)
                 res['content'].append([band.name, ] + hrow)
         elif self.rtype == 'ahh':
-            #  Округление до получаса
-            minute = 0 if dtfrom.minute < 30 else 30
-            dttemp = datetime(dtfrom.year, dtfrom.month, dtfrom.day, dtfrom.hour, minute)
-            if minute == 0:
-                dttemp += timedelta(hours=1)
+            dttemp = round_tm_30_up(dtfrom)
             #  Заполнение заголовков
+            res['rtitles'].append(dttemp)
             while dttemp <= dtto:
                 dttemp += timedelta(minutes=30)
-                if dttemp <= dtto:
-                    res['rtitles'].append(dttemp)
+                res['rtitles'].append(dttemp)
             for band in self.bands.all():
                 prm = Param.objects.get(pk=band.param_num)
-                hist_data = prm.get_30p_data(dtfrom, dtto)
+                # Интервал берем заведомо больший, чтобы учесть ведущие и завершающие дельты
+                hist_data = prm.get_30p_data(dtfrom - timedelta(minutes=30), dtto + timedelta(minutes=30))
                 hrow = []
                 for tm in res['rtitles']:
                     tv = hist_data['ctrl_tm'].get(tm, '-')

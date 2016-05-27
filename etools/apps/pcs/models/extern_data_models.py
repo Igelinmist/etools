@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 import psycopg2
 import pyodbc
@@ -7,7 +7,7 @@ from django.db import models
 from django.conf import settings
 
 from pcs.constants import PERMISSIBLE_PREC
-from pcs.utils import AddrCoder
+from pcs.utils import AddrCoder, round_tm_30_up, delta_e, round_hr
 
 
 Hist = namedtuple('Hist', ['dt', 'v'])
@@ -117,13 +117,7 @@ class Param(models.Model):
                 res = timedelta(hours=1) - timedelta(minutes=dttm.minute, seconds=dttm.second)
             return res
 
-        def _round_hr(dttm):
-            if dttm.minute < 30:
-                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0)
-            else:
-                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 0, 0) + timedelta(hours=1)
         d_list = pcs_source._hist_data('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
-
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname, }
         # the data on the edge of hour
@@ -133,7 +127,7 @@ class Param(models.Model):
             if not (PERMISSIBLE_PREC < item.dt.minute < (60 - PERMISSIBLE_PREC)):
                 # замеры подходят для привязки к часу
                 # нужно выделить наиболее близкое значение к началу часа
-                ctrl_hour = _round_hr(item.dt)
+                ctrl_hour = round_hr(item.dt)
                 if previous_mes:
                     if previous_mes['appr'] > _get_hr_dist(item.dt):
                         # все еще приближаемся к началу часа
@@ -155,16 +149,6 @@ class Param(models.Model):
 
     def get_30p_data(self, dttm_from=date.today() - timedelta(1), dttm_to=date.today()):
 
-        def _round_tm_30_up(dttm):
-            if dttm.minute < 30:
-                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour, 30)
-            else:
-                return datetime(dttm.year, dttm.month, dttm.day, dttm.hour) + timedelta(hours=1)
-
-        def _delta_e(p, t1, t2):
-            dt = t2 - t1
-            return p * 1000 * dt.seconds / 1800
-
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname,
                'ctrl_tm': {}, }
@@ -176,18 +160,18 @@ class Param(models.Model):
         # Берем первый замер, переносим в буфер
         buf_t, buf_v = d_list.pop(0)
         # Находим первую метку времени получасовки и инициализируем накопитель нулем
-        buf_30t = _round_tm_30_up(buf_t)
+        buf_30t = round_tm_30_up(buf_t)
         res['ctrl_tm'][buf_30t] = 0
         for item in d_list:
             if item.dt > buf_30t:
                 # Если перешагнули получасовку
-                res['ctrl_tm'][buf_30t] += _delta_e(buf_v, buf_t, buf_30t)
+                res['ctrl_tm'][buf_30t] += delta_e(buf_v, buf_t, buf_30t) * 2
                 buf_t = buf_30t
-                buf_30t = _round_tm_30_up(item.dt)
+                buf_30t = round_tm_30_up(item.dt)
                 res['ctrl_tm'][buf_30t] = 0
             else:
                 # Если не перешагнули получасовку
-                res['ctrl_tm'][buf_30t] += _delta_e(buf_v, buf_t, item.dt)
+                res['ctrl_tm'][buf_30t] += delta_e(buf_v, buf_t, item.dt) * 2
                 buf_t, buf_v = item
         # Запрос получасовок в базе данных АИИС КУЭ
         askue_dict = askue_source._30p_data(self.enh_addr, dttm_from, dttm_to + timedelta(minutes=15))
