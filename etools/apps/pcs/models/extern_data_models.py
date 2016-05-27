@@ -161,29 +161,42 @@ class Param(models.Model):
             else:
                 return datetime(dttm.year, dttm.month, dttm.day, dttm.hour) + timedelta(hours=1)
 
-        d_list = pcs_source._hist_data('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
-        askue_dict = askue_source._30p_data(self.enh_addr, dttm_from, dttm_to)
+        def _delta_e(p, t1, t2):
+            dt = t2 - t1
+            return p * 1000 * dt.seconds/3600
+
         res = {'prm_num': self.prmnum,
-               'prm_name': self.prmname, }
-        res['ctrl_tm'] = {}
-        tmp_stor = {'cnt': 0, 'val': 0}
-        tmp_tm = _round_tm_30_up(dttm_from)
+               'prm_name': self.prmname,
+               'ctrl_tm': {}, }
+        # Запрос исторических данных телеметрии в базе
+        d_list = pcs_source._hist_data('hist_' + self.ms_accronim.lower(), self.prmnum, dttm_from, dttm_to)
+        if len(d_list) == 0:
+            return res
+        # >
+        # Берем первый замер, переносим в буфер
+        buf_t, buf_v = d_list.pop(0)
+        # Находим первую метку времени получасовки и инициализируем накопитель нулем
+        buf_30t = _round_tm_30_up(buf_t)
+        res['ctrl_tm'][buf_30t] = 0
         for item in d_list:
-            if item.dt <= tmp_tm:
-                tmp_stor['cnt'] += 1
-                tmp_stor['val'] += item.v
+            if item.dt > buf_30t:
+                # Если перешагнули получасовку
+                res['ctrl_tm'][buf_30t] += _delta_e(buf_v, buf_t, buf_30t)
+                buf_t = buf_30t
+                buf_30t = _round_tm_30_up(item.dt)
+                res['ctrl_tm'][buf_30t] = 0
             else:
-                if tmp_stor['cnt'] > 0:
-                    sval = '{: .0f}</br>-------</br>{: .0f}'.format(
-                        (tmp_stor['val'] / tmp_stor['cnt'])*1000, askue_dict.get(tmp_tm, 0))
-                    res['ctrl_tm'][tmp_tm] = Hist(tmp_tm, sval)
-                tmp_tm = _round_tm_30_up(item.dt)
-                tmp_stor['cnt'] = 1
-                tmp_stor['val'] = item.v
-        sval = '{: .0f}</br>-------</br>{: .0f}'.format(
-            (tmp_stor['val'] / tmp_stor['cnt'])*1000, askue_dict.get(tmp_tm, 0))
-        res['ctrl_tm'][tmp_tm] = Hist(tmp_tm, sval)
-        # res['ctrl_tm'][tmp_tm] = Hist(tmp_tm, round((tmp_stor['val'] / tmp_stor['cnt']) * 1000))
+                # Если не перешагнули получасовку
+                res['ctrl_tm'][buf_30t] += _delta_e(buf_v, buf_t, item.dt)
+                buf_t, buf_v = item
+        # Запрос получасовок в базе данных АИИС КУЭ
+        askue_dict = askue_source._30p_data(self.enh_addr, dttm_from, dttm_to + timedelta(minutes=15))
+        for key, val in res['ctrl_tm'].items():
+            askue_val = askue_dict.get(key, None)
+            if askue_val:
+                res['ctrl_tm'][key] = '{}</br>-----</br>{}'.format(round(val), round(askue_val / 2))
+            else:
+                res['ctrl_tm'][key] = '{}</br>-----</br>{}'.format(round(val), '-')
         return res
 
 pcs_source = PCS(

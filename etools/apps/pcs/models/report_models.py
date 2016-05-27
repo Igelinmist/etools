@@ -76,8 +76,6 @@ class Report(models.Model):
                 hrow = []
                 for tm in res['rtitles']:
                     tv = hist_data['ctrl_tm'].get(tm, '-')
-                    if tv != '-':
-                        tv = tv.v
                     hrow.append(tv)
                 res['content'].append([band.name, ] + hrow)
         return res
