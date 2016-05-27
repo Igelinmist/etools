@@ -163,7 +163,7 @@ class Param(models.Model):
 
         def _delta_e(p, t1, t2):
             dt = t2 - t1
-            return p * 1000 * dt.seconds/3600
+            return p * 1000 * dt.seconds / 1800
 
         res = {'prm_num': self.prmnum,
                'prm_name': self.prmname,
@@ -194,7 +194,7 @@ class Param(models.Model):
         for key, val in res['ctrl_tm'].items():
             askue_val = askue_dict.get(key, None)
             if askue_val:
-                res['ctrl_tm'][key] = '{}</br>-----</br>{}'.format(round(val), round(askue_val / 2))
+                res['ctrl_tm'][key] = '{}</br>-----</br>{}'.format(round(val), round(askue_val))
             else:
                 res['ctrl_tm'][key] = '{}</br>-----</br>{}'.format(round(val), '-')
         return res
