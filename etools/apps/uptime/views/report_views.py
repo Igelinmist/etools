@@ -1,8 +1,9 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, HttpResponse
 
 from ..models.report_models import Report
 from ..models.journal_models import Equipment
 from ..forms.report_forms import ChooseReportForm
+from ..excel_utils import WriterToExcel
 
 
 def reports(request):
@@ -32,8 +33,15 @@ def report_show(request):
         'rdate': request.GET['date'],
         'rdate_from': request.GET['date_from'],
     }
-    return render(
-        request,
-        'uptime/report.html',
-        context
-    )
+    if 'excel' in request.POST:
+        response = HttpResponse(content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=Report.xlsx'
+        xlsx_data = WriterToExcel()
+        response.write(xlsx_data)
+        return response
+    else:
+        return render(
+            request,
+            'uptime/report.html',
+            context
+        )

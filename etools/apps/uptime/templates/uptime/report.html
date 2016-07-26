@@ -11,6 +11,13 @@
             {{ rdate_from }}
         {% endif %}
     </small></h2>
+    <div class="row">
+        <form method="POST">
+            {% csrf_token %}
+                <button type="submit" class="btn btn-default pull-right" name="excel">Экспорт в Excel</button>
+            </div>
+        </form>
+    </div>
     {% for report, rtable in rdata %}
     <table class="table table-bordered table-condensed">
         <h3>{{ report.title }}</h3>
