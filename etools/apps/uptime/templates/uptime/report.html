@@ -7,14 +7,14 @@
         <button type="submit" class="btn btn-default pull-right" name="excel">Экспорт в Excel</button>
     </form>
     <h2>Отчет по наработке <small> на
-        {% if rdate %}
-            {{ rdate }}
+        {% if date %}
+            {{ date }}
         {% else %}
             текущую дату
         {% endif %}
-        {% if rdate_from %}
+        {% if date_from %}
             c
-            {{ rdate_from }}
+            {{ date_from }}
         {% endif %}
     </small></h2>
     {% for report, rtable in rdata %}
