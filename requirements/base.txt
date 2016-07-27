@@ -24,3 +24,6 @@ django-widget-tweaks==1.4.0
 
 # Bitfield for configuring journals
 django-bitfield
+
+# Export data in Excel format
+xlsxwriter==0.9.3

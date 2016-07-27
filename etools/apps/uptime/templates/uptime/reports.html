@@ -5,6 +5,7 @@
 {% block content %}
 <form action="{% url 'uptime:report_show' %}" method="get" class="form-inline">
     {{ form }}
-    <input type="submit" value="Сформировать" class="btn btn-default" />
+    <input type="submit" value="Показать" class="btn btn-default" />
+    <button type="submit" class="btn btn-default pull-right" name="excel">Экспорт в Excel</button>
 </form>
 {% endblock content %}
