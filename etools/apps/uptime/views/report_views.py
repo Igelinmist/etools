@@ -30,13 +30,14 @@ def report_show(request):
     report = get_object_or_404(Report, pk=request.GET['report_id'])
     context = {
         'rdata': report.prepare_reports_content(request.GET['date'], request.GET['date_from']),
-        'rdate': request.GET['date'],
-        'rdate_from': request.GET['date_from'],
+        'date': request.GET['date'],
+        'date_from': request.GET['date_from'],
+        'report_id': request.GET['report_id'],
     }
-    if 'excel' in request.POST:
+    if 'excel' in request.GET:
         response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename=Report.xlsx'
-        xlsx_data = WriterToExcel()
+        xlsx_data = WriterToExcel(context)
         response.write(xlsx_data)
         return response
     else:
