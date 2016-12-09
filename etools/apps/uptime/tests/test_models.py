@@ -251,6 +251,14 @@ class EquipmentTestCase(TestCase):
 
         self.assertEquals(unit_tree, [(1, 0), (8, 1), (2, 2), (4, 3), (3, 2), (5, 3), (6, 1), (7, 2)])
 
+    def test_filter_unit_tree_building_without_writed_off_onelevel_eq(self):
+        head_unit = Equipment.objects.get(pk=1)
+        wo_eq = Equipment.objects.get(pk=7)
+        wo_eq.journal.events.create(date='2016-01-01', event_code='sps')
+        unit_tree = [(u.id, ident) for (u, ident) in head_unit.unit_tree(only_alive=True)]
+
+        self.assertEquals(unit_tree, [(1, 0), (8, 1), (2, 2), (4, 3), (3, 2), (5, 3), (6, 1)])
+
 
 class ReportTestCase(TestCase):
 
