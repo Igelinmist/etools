@@ -211,6 +211,12 @@ class EquipmentTestCase(TestCase):
              }}, ]
         )
 
+    def test_full_unit_tree_building(self):
+        head_unit = Equipment.objects.get(pk=1)
+        unit_tree = [(u.id, ident) for (u, ident) in head_unit.unit_tree()]
+
+        self.assertEquals(unit_tree, [(1, 0), (8, 1), (2, 2), (4, 3), (3, 2), (5, 3), (6, 1), (7, 2)])
+
 
 class ReportTestCase(TestCase):
 
