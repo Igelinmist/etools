@@ -78,7 +78,9 @@ class Equipment(models.Model):
                 if eq.id in knot_dict:
                     get_tree(knot_dict, tree, ident, eq)
                 else:
-                    tree.append((eq, ident))
+                    # Проверка для оборудования без составляющих
+                    if eq.is_alive:
+                        tree.append((eq, ident))
 
         units = Equipment.objects.all()
         tree = []
@@ -91,7 +93,7 @@ class Equipment(models.Model):
         Description: Метод собирает все наличествующие записи статистики для дерева
         журналов (на базе дерева оборудования) от указанного узла.
         """
-        eq_list = self.unit_tree()
+        eq_list = self.unit_tree(only_alive=True)
         # Собрать все номера журналов для вычисленного дерева оборудования
         journal_set = {
             eq.journal_id for eq, ident in eq_list
