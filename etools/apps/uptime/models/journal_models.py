@@ -46,7 +46,15 @@ class Equipment(models.Model):
         else:
             return None
 
-    def unit_tree(self):
+    @property
+    def is_alive(self):
+        res = True
+        if self.journal_id:
+            if self.journal.events.filter(event_code='sps'):
+                res = False
+        return res
+
+    def unit_tree(self, only_alive=None):
         """
         Description: Метод строит дерево (список) подчиненных объектов, включая отступ
         глубины вложенности.
@@ -62,6 +70,8 @@ class Equipment(models.Model):
 
         def get_tree(knot_dict, tree, ident=0, node=None):
             if node:
+                if only_alive and not node.is_alive:
+                    return
                 tree.append((node, ident))
             ident += 1
             for eq in knot_dict[node.id if node else None]:

@@ -217,6 +217,40 @@ class EquipmentTestCase(TestCase):
 
         self.assertEquals(unit_tree, [(1, 0), (8, 1), (2, 2), (4, 3), (3, 2), (5, 3), (6, 1), (7, 2)])
 
+    def is_alive_property_on_true(self):
+        wo_eq = Equipment.objects.get(pk=2)
+
+        self.assertEquals(wo_eq.is_alive, True)
+
+    def is_alive_property_on_false(self):
+        wo_eq = Equipment.objects.get(pk=2)
+        wo_eq.journal.events.create(date='2016-01-01', event_code='sps')
+
+        self.assertEquals(wo_eq.is_alive, False)
+
+    def is_alive_property_on_false_with_mistake_multiple_sps(self):
+        wo_eq = Equipment.objects.get(pk=2)
+        wo_eq.journal.events.create(date='2015-01-01', event_code='sps')
+        wo_eq.journal.events.create(date='2016-01-01', event_code='sps')
+
+        self.assertEquals(wo_eq.is_alive, False)
+
+    def test_filter_unit_tree_building_without_writed_off_eq(self):
+        head_unit = Equipment.objects.get(pk=1)
+        wo_eq = Equipment.objects.get(pk=2)
+        wo_eq.journal.events.create(date='2016-01-01', event_code='sps')
+        unit_tree = [(u.id, ident) for (u, ident) in head_unit.unit_tree(only_alive=True)]
+
+        self.assertEquals(unit_tree, [(1, 0), (8, 1), (3, 2), (5, 3), (6, 1), (7, 2)])
+
+    def test_filter_unit_tree_building_with_writed_off_eq(self):
+        head_unit = Equipment.objects.get(pk=1)
+        wo_eq = Equipment.objects.get(pk=2)
+        wo_eq.journal.events.create(date='2016-01-01', event_code='sps')
+        unit_tree = [(u.id, ident) for (u, ident) in head_unit.unit_tree()]
+
+        self.assertEquals(unit_tree, [(1, 0), (8, 1), (2, 2), (4, 3), (3, 2), (5, 3), (6, 1), (7, 2)])
+
 
 class ReportTestCase(TestCase):
 
