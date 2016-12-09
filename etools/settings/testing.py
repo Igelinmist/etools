@@ -6,3 +6,14 @@ PCS_DATABASE = {
     'USER': 'pcs_view',
     'PWD': 'pcs',
 }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'etools',
+        'USER': 'puser',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+}
