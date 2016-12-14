@@ -3,6 +3,7 @@ from datetime import date, timedelta
 
 from uptime.models.journal_models import Equipment, Journal
 from uptime.models.report_models import Report
+from uptime.constants import STATE_SET
 
 
 class JournalTestCase(TestCase):
@@ -63,6 +64,18 @@ class JournalTestCase(TestCase):
         self.assertEquals(date_list_child, [date(2015, 1, 5),
                                             date(2015, 1, 4),
                                             date(2015, 1, 3), ])
+
+    def test_get_staying_for_all_states_default_time(self):
+        journal = Journal.objects.all()[0]
+        journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
+        journal.write_record('02.01.2015', arm='24:00')
+        test_dict = { state: '-' for state in STATE_SET }
+        test_dict['wrk'] = '15'
+        test_dict['arm'] = '33'
+        state_stat_dict = journal.state_stat()
+
+        self.assertIsInstance(state_stat_dict, dict)
+        self.assertEqual(state_stat_dict, test_dict)
 
     def test_journal_switch_record_on_exist_record(self):
         journal = Journal.objects.all()[0]

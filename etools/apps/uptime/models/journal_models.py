@@ -249,7 +249,7 @@ class Journal(models.Model):
 
     def get_stat(self, from_date=None, to_date=None, state_code='wrk'):
         """
-        Description: Метод расчет суммарного времени нахождения в некотором состоянии
+        Description: Метод расчета суммарного времени нахождения в некотором состоянии
         (по умолчанию в работе) на временном интервале
         """
         r_set = self.records
@@ -264,6 +264,15 @@ class Journal(models.Model):
             r_set = r_set.filter(intervals__state_code=state_code)
         total = r_set.aggregate(models.Sum('intervals__time_in_state'))['intervals__time_in_state__sum']
         return stat_timedelta_for_report(total)
+
+    def state_stat(self, from_date=None, to_date=None):
+        """
+        Description: Метод расчета статистики нахождения во всех возможных состояниях
+        на временном интервале (по умолчанию с ввода по текущий момент времени)
+        """
+        res = { state: self.get_stat(from_date, to_date, state) for state in STATE_SET }
+
+        return res
 
     def get_journal_or_subjournal(self, part_name=None):
         if part_name:
