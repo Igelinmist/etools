@@ -16,7 +16,7 @@ def index(request):
             head_unit = request.user.profile.equipment
         except AttributeError:
             pass
-    context = {'equipment_list': head_unit.unit_tree()}
+    context = {'equipment_list': head_unit.unit_tree(only_alive=False)}
     return render(request, 'uptime/index.html', context)
 
 

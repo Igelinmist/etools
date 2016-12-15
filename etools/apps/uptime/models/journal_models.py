@@ -79,8 +79,9 @@ class Equipment(models.Model):
                     get_tree(knot_dict, tree, ident, eq)
                 else:
                     # Проверка для оборудования без составляющих
-                    if eq.is_alive:
-                        tree.append((eq, ident))
+                    if only_alive and not eq.is_alive:
+                        continue
+                    tree.append((eq, ident))
 
         units = Equipment.objects.all()
         tree = []
