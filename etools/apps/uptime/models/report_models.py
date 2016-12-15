@@ -34,7 +34,8 @@ class Report(models.Model):
         part_set = self.equipment.parts.order_by('name').all()
         journals_table = []
         for part in part_set:
-            if part.journal.is_deregister:
+            # if part.journal.is_deregister:
+            if not part.journal.equipment.is_alive:
                 continue
             journals_table.append([
                 part.journal.get_journal_or_subjournal(

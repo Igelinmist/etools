@@ -54,7 +54,7 @@ class Equipment(models.Model):
                 res = False
         return res
 
-    def unit_tree(self, only_alive=None):
+    def unit_tree(self, only_alive=False):
         """
         Description: Метод строит дерево (список) подчиненных объектов, включая отступ
         глубины вложенности.
