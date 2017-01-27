@@ -6,6 +6,3 @@ Python/Django project with cookiecutter layout.
 Реализован на языке Python, фреймворке Django.
 Проект построен по структуре cookiecutter (https://github.com/marcofucci/cookiecutter-simple-django), 
 что отличается от структуры учебника. Приложение uptime находится в каталоге etools/apps/uptime.
-
-Feature:
-    Добавление информации по статистике на страницу журнала
