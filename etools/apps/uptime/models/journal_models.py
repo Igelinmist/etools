@@ -169,6 +169,22 @@ class Journal(models.Model):
             ('delete_journal_event', 'Delete journal event'),
         )
 
+    @property
+    def is_deregister(self):
+        ev = self.events.order_by('-date').all()
+        if ev and ev[0].event_code == 'sps':
+            return True
+        else:
+            return False
+
+    @property
+    def state_cnt(self):
+        return sum(1 for _ in filter(lambda x: x[1], self.control_flags))
+
+    @property
+    def state_list(self):
+        return list(map(lambda x: x[0], filter(lambda x: x[1], self.control_flags)))
+
     def __str__(self):
         plant_name = self._equipment_cache.plant.name if self._equipment_cache.plant else '-'
         return plant_name + ' \ ' + self._equipment_cache.name
@@ -248,7 +264,7 @@ class Journal(models.Model):
 
     # Методы для формирования отчетов
 
-    def get_stat(self, from_date=None, to_date=None, state_code='wrk'):
+    def get_stat(self, from_date=None, to_date=None, state_code='wrk', round_to_hour=True, sum_wrk_hrs=True):
         """
         Description: Метод расчета суммарного времени нахождения в некотором состоянии
         (по умолчанию в работе) на временном интервале
@@ -258,20 +274,20 @@ class Journal(models.Model):
             r_set = r_set.filter(rdate__gte=from_date)
         if to_date:
             r_set = r_set.exclude(rdate__gte=to_date)
-        # По техническому заданию горячий резерв суммируется к работе
-        if state_code == 'wrk':
+        # По техническому заданию горячий резерв суммируется к работе в отчетах
+        if state_code == 'wrk' and sum_wrk_hrs:
             r_set = r_set.filter(models.Q(intervals__state_code='wrk') | models.Q(intervals__state_code='hrs'))
         else:
             r_set = r_set.filter(intervals__state_code=state_code)
         total = r_set.aggregate(models.Sum('intervals__time_in_state'))['intervals__time_in_state__sum']
-        return stat_timedelta_for_report(total)
+        return stat_timedelta_for_report(total, round_to_hour)
 
-    def state_stat(self, from_date=None, to_date=None):
+    def state_stat(self, from_date=None, to_date=None, round_to_hour=True, sum_wrk_hrs=True):
         """
         Description: Метод расчета статистики нахождения во всех возможных состояниях
         на временном интервале (по умолчанию с ввода по текущий момент времени)
         """
-        res = { state: self.get_stat(from_date, to_date, state) for state in STATE_SET }
+        res = { state: self.get_stat(from_date, to_date, state, round_to_hour) for state in self.state_list }
 
         return res
 
@@ -344,18 +360,6 @@ class Journal(models.Model):
                 to_date=date_to,
                 state_code='wrk'
             )
-
-    @property
-    def is_deregister(self):
-        ev = self.events.order_by('-date').all()
-        if ev and ev[0].event_code == 'sps':
-            return True
-        else:
-            return False
-
-    @property
-    def state_cnt(self):
-        return sum(1 for _ in filter(lambda x: x[1], self.control_flags))
 
 
 class RecordManager(models.Manager):

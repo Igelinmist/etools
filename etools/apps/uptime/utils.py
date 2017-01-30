@@ -30,13 +30,16 @@ def yesterday_local():
     return (date.today() - timedelta(days=1)).strftime("%d.%m.%Y")
 
 
-def stat_timedelta_for_report(time_delta):
+def stat_timedelta_for_report(time_delta, round_to_hour=True):
     if time_delta:
         sec = time_delta.total_seconds()
         hours, remainder = divmod(sec, 3600)
-        if remainder >= 1800:
-            hours += 1
-        return str(int(hours))
+        if round_to_hour:
+            if remainder >= 1800:
+                hours += 1
+            return str(int(hours))
+        minutes, remainder = divmod(remainder, 60)
+        return "{0:,d}:{1:02}".format(int(hours), int(minutes)).replace(',',' ')
     else:
         return '-'
 

@@ -15,18 +15,29 @@
     {% endfor %}
   </tr>
   {% for rec in record_list %}
-  <tr>
-    <td class="text-center">{{ rec.rdate|date:"d.m.Y" }}</td>
-    <td class="text-center">{{ rec.down_cnt }}</td>
-    <td class="text-center">{{ rec.up_cnt }}</td>
-    {% for f in journal.control_flags %}
-      {% if f.1 %}
-        <td class="text-center">{{ rec|state_value:f.0 }}</td>
-      {% endif %}
-    {% endfor %}
-    <td>
-      {% include "uptime/partials/_records_actions.html" %}
-    </td>
-  </tr>
+    <tr>
+      <td class="text-center">{{ rec.rdate|date:"d.m.Y" }}</td>
+      <td class="text-center">{{ rec.down_cnt }}</td>
+      <td class="text-center">{{ rec.up_cnt }}</td>
+      {% for f in journal.control_flags %}
+        {% if f.1 %}
+          <td class="text-center">{{ rec|state_value:f.0 }}</td>
+        {% endif %}
+      {% endfor %}
+      <td>
+        {% include "uptime/partials/_records_actions.html" %}
+      </td>
+    </tr>
   {% endfor %}
+  {% if stat %}
+      <tr>
+        <th class="text-center" rowspan="2">Наработка</th>
+        <th class="text-center" rowspan="2"></th>
+        <th class="text-center" rowspan="2"></th>
+        {% for state in journal.state_list %}
+            <th class="text-center">{{ stat|key:state }}</th>
+        {% endfor %}
+        <th class="text-center" rowspan="2"></th>
+      </tr>
+  {% endif %}
 </table>
