@@ -32,8 +32,8 @@
   {% if stat %}
       <tr>
         <th class="text-center" rowspan="2">Наработка</th>
-        <th class="text-center" rowspan="2"></th>
-        <th class="text-center" rowspan="2"></th>
+        <th class="text-center" rowspan="2">{{ stat.down_cnt }}</th>
+        <th class="text-center" rowspan="2">{{ stat.up_cnt }}</th>
         {% for state in journal.state_list %}
             <th class="text-center">{{ stat|key:state }}</th>
         {% endfor %}

@@ -25,7 +25,7 @@ def show(request, journal_id):
     record_list = journal.get_last_records(depth=5)
     event_list = journal.events.order_by('-date')[:3]
     form = EventForm(None)
-    stat = journal.state_stat(round_to_hour=False)
+    stat = journal.full_stat()
     context = {
         'journal': journal,
         'record_list': record_list,

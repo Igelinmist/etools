@@ -285,10 +285,24 @@ class Journal(models.Model):
     def state_stat(self, from_date=None, to_date=None, round_to_hour=True, sum_wrk_hrs=True):
         """
         Description: Метод расчета статистики нахождения во всех возможных состояниях
-        на временном интервале (по умолчанию с ввода по текущий момент времени)
+        на временном интервале (по умолчанию с ввода по текущий момент времени).
+        Дополнтительно - число пусков и остановов.
         """
         res = { state: self.get_stat(from_date, to_date, state, round_to_hour) for state in self.state_list }
 
+        return res
+
+    def full_stat(self):
+        """
+        Dscription: Метод получения полной статистики для страницы журнала,
+        включая пуски и остановы.
+        """
+        res = self.state_stat(round_to_hour=False)
+        q_res = self.records.aggregate(
+            models.Sum('up_cnt'),
+            models.Sum('down_cnt'))
+        res['down_cnt'] = q_res['down_cnt__sum']
+        res['up_cnt'] = q_res['up_cnt__sum']
         return res
 
     def get_journal_or_subjournal(self, part_name=None):

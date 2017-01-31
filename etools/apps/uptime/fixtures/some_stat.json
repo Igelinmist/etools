@@ -1,0 +1,94 @@
+[
+    {
+        "model": "uptime.equipment",
+        "pk": 1,
+        "fields": {
+            "name": "device"
+        }
+    },
+    {
+        "model": "uptime.journal",
+        "pk": 1,
+        "fields": {
+            "equipment": 1,
+            "control_flags": 253
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 1,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-01",
+            "up_cnt": 1,
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 1,
+        "fields": {
+            "record": 1,
+            "state_code": "arm",
+            "time_in_state": "09:29:00"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 2,
+        "fields": {
+            "record": 1,
+            "state_code": "wrk",
+            "time_in_state": "14:31:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 2,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-02",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 3,
+        "fields": {
+            "record": 2,
+            "state_code": "wrk",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 3,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-03",
+            "down_cnt": 1,
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 4,
+        "fields": {
+            "record": 3,
+            "state_code": "wrk",
+            "time_in_state": "02:28:00"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 5,
+        "fields": {
+            "record": 3,
+            "state_code": "krm",
+            "time_in_state": "21:32:00"
+        }
+    }
+]
