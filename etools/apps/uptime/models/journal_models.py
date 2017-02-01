@@ -297,10 +297,20 @@ class Journal(models.Model):
         Dscription: Метод получения полной статистики для страницы журнала,
         включая пуски и остановы.
         """
-        res = self.state_stat(round_to_hour=False)
-        q_res = self.records.aggregate(
-            models.Sum('up_cnt'),
-            models.Sum('down_cnt'))
+        try:
+            evt = self.events.filter(event_code='zmn')[0]
+            dt_from = evt.date.isoformat()
+        except IndexError:
+            dt_from = None
+        res = self.state_stat(from_date=dt_from, round_to_hour=False)
+        if dt_from:
+            q_res = self.records.filter(rdate__gte=dt_from).aggregate(
+                models.Sum('up_cnt'),
+                models.Sum('down_cnt'))
+        else:
+            q_res = self.records.aggregate(
+                models.Sum('up_cnt'),
+                models.Sum('down_cnt'))
         res['down_cnt'] = q_res['down_cnt__sum']
         res['up_cnt'] = q_res['up_cnt__sum']
         return res

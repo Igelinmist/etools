@@ -90,5 +90,81 @@
             "state_code": "krm",
             "time_in_state": "21:32:00"
         }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 4,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-04",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 6,
+        "fields": {
+            "record": 4,
+            "state_code": "rcd",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 5,
+        "fields": {
+            "journal": 1,
+            "rdate": "2015-11-05",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 7,
+        "fields": {
+            "record": 5,
+            "state_code": "rcd",
+            "time_in_state": "24:00:00"
+        }
+    },
+    {
+        "model": "uptime.eventitem",
+        "pk": 1,
+        "fields": {
+            "journal": 1,
+            "date": "2015-11-06",
+            "event_code": "zmn"
+        }
+    },
+    {
+        "model": "uptime.record",
+        "pk": 6,
+        "fields": {
+            "journal": 1,
+            "up_cnt": 1,
+            "rdate": "2015-11-06",
+            "created_at": "2016-04-04T09:00:00.000",
+            "updated_at": "2016-04-04T09:00:00.000"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 8,
+        "fields": {
+            "record": 6,
+            "state_code": "rsv",
+            "time_in_state": "10:31:00"
+        }
+    },
+    {
+        "model": "uptime.intervalitem",
+        "pk": 9,
+        "fields": {
+            "record": 6,
+            "state_code": "wrk",
+            "time_in_state": "13:29:00"
+        }
     }
 ]
