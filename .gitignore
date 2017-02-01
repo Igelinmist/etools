@@ -63,6 +63,7 @@ etools/settings/production.py
 etools/assets/
 etools/static/
 tools/
+static/
 
 .DS_Store
 
