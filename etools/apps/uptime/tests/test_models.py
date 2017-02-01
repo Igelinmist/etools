@@ -69,7 +69,7 @@ class JournalTestCase(TestCase):
         journal = Journal.objects.all()[0]
         journal.write_record('01.01.2015', wrk='15:00', arm='9:00', down_cnt=1)
         journal.write_record('02.01.2015', arm='24:00')
-        test_dict = { state: '-' for state in STATE_SET }
+        test_dict = { state: '-' for state in journal.state_list }
         test_dict['wrk'] = '15'
         test_dict['arm'] = '33'
         state_stat_dict = journal.state_stat()
