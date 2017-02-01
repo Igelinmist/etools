@@ -302,13 +302,17 @@ class Journal(models.Model):
             dt_from = evt.date.isoformat()
         except IndexError:
             dt_from = None
-        res = self.state_stat(from_date=dt_from, round_to_hour=False)
+        if self.stat_by_parent:
+            journal = self.equipment.plant.journal
+        else:
+            journal = self
+        res = journal.state_stat(from_date=dt_from, round_to_hour=False)
         if dt_from:
-            q_res = self.records.filter(rdate__gte=dt_from).aggregate(
+            q_res = journal.records.filter(rdate__gte=dt_from).aggregate(
                 models.Sum('up_cnt'),
                 models.Sum('down_cnt'))
         else:
-            q_res = self.records.aggregate(
+            q_res = journal.records.aggregate(
                 models.Sum('up_cnt'),
                 models.Sum('down_cnt'))
         res['down_cnt'] = q_res['down_cnt__sum']
