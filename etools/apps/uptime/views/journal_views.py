@@ -25,11 +25,13 @@ def show(request, journal_id):
     record_list = journal.get_last_records(depth=5)
     event_list = journal.events.order_by('-date')[:3]
     form = EventForm(None)
+    stat = journal.full_stat()
     context = {
         'journal': journal,
         'record_list': record_list,
         'event_list': event_list,
         'form': form,
+        'stat': stat,
     }
     return render(request, 'uptime/show.html', context)
 
