@@ -386,7 +386,8 @@ class Journal(models.Model):
             return journal.get_stat(
                 from_date=date_from,
                 to_date=date_to,
-                state_code='wrk'
+                state_code='wrk',
+                round_to_hour=False,
             )
 
 
