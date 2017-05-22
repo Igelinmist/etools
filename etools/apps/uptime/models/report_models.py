@@ -48,7 +48,7 @@ class Report(models.Model):
             'columns': columns,
         }
 
-    def prepare_report_data(self, round_to_hour, report_date=None, report_date_from=None):
+    def prepare_report_data(self, report_date=None, report_date_from=None, round_to_hour=True):
         """
         Метод заполняет данными таблицу для отчета
         """
@@ -87,7 +87,7 @@ class Report(models.Model):
                 )
         return report_set
 
-    def prepare_reports_content(self, round_to_hour=True, ru_date=None, ru_date_from=None):
+    def prepare_reports_content(self, ru_date=None, ru_date_from=None, round_to_hour=True):
         """
         Метод готовит одну или несколько таблиц отчетов,
         в зависимости от того, является ли исходный отчет
@@ -112,9 +112,9 @@ class Report(models.Model):
                 try:
                     temp_report = eq.report
                     temp_report_table = temp_report.prepare_report_data(
-                        round_to_hour=round_to_hour,
                         report_date=qdate,
                         report_date_from=qdate_from,
+                        round_to_hour=round_to_hour,
                     )
                     report_list.append((temp_report, temp_report_table))
                 except Report.DoesNotExist:
@@ -123,9 +123,9 @@ class Report(models.Model):
             report_list.append(
                 (self,
                  self.prepare_report_data(
-                    round_to_hour=round_to_hour,
                     report_date=qdate,
                     report_date_from=qdate_from,
+                    round_to_hour=round_to_hour,
                     ))
             )
         sorted_report_list = sorted(report_list, key=lambda k: k[0].weight)
