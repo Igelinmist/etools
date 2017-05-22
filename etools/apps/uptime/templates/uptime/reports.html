@@ -3,9 +3,49 @@
 {{ form.media }}
 {% endblock head_ext %}
 {% block content %}
-<form action="{% url 'uptime:report_show' %}" method="get" class="form-inline">
-    {{ form }}
-    <input type="submit" value="Показать" class="btn btn-default" />
-    <button type="submit" class="btn btn-default pull-right" name="excel">Экспорт в Excel</button>
-</form>
+<div class="container">
+  <form action="{% url 'uptime:report_show' %}" method="get">
+  <fieldset>
+    <legend>Настройка отчета</legend>
+    {{ form.non_field_errors }}
+    <div class="fieldWrapper form-group row">
+        {{ form.date_from.errors }}
+        <label for="{{ form.date_from.id_for_label }}" class="col-sm-2 col-form-label">От даты:</label>
+        <div class="col-sm-3">
+          {{ form.date_from }}
+        </div>
+    </div>
+    <div class="fieldWrapper form-group row">
+        {{ form.date.errors }}
+        <label for="{{ form.date.id_for_label }}" class="col-sm-2 col-form-label">На дату:</label>
+        <div class="col-sm-3">
+          {{ form.date }}
+        </div>
+    </div>
+    <div class="fieldWrapper form-group row">
+        {{ form.round_to_hour.errors }}
+        <label for="{{ form.round_to_hour.id_for_label }}" class="col-sm-2 col-form-label">С округлением часов:</label>
+        <div class="col-sm-2">
+          {{ form.round_to_hour }}
+        </div>
+    </div>
+    <div class="fieldWrapper form-group row">
+        {{ form.report_id.errors }}
+        <label for="{{ form.report_id.id_for_label }}" class="col-sm-2 col-form-label">Отчет:</label>
+        <div class="col-sm-3 custom-select">
+          {{ form.report_id }}
+        </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-sm-2">
+        <input type="submit" value="Показать" class="btn btn-default" />
+      </div>
+      <div class="col-sm-2">
+        <button type="submit" class="btn btn-default pull-right" name="excel">Открыть в Excel</button>
+      </div>
+    </div> 
+    
+  </fieldset>
+  </form>
+</div>
 {% endblock content %}

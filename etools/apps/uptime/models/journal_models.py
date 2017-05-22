@@ -330,7 +330,7 @@ class Journal(models.Model):
         else:
             return self
 
-    def get_report_cell(self, summary_type='ITV', from_event='FVZ', date_to=None, date_from=None):
+    def get_report_cell(self, round_to_hour, summary_type='ITV', from_event='FVZ', date_to=None, date_from=None):
         from_event_to_event_dict = {
             'FVZ': 'zmn',
             'FKR': 'vkr',
@@ -387,7 +387,7 @@ class Journal(models.Model):
                 from_date=date_from,
                 to_date=date_to,
                 state_code='wrk',
-                round_to_hour=False,
+                round_to_hour=round_to_hour,
             )
 
 
