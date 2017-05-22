@@ -30,7 +30,11 @@ def reports(request):
 def report_show(request):
     report = get_object_or_404(Report, pk=request.GET['report_id'])
     context = {
-        'rdata': report.prepare_reports_content(request.GET['date'], request.GET['date_from']),
+        'rdata': report.prepare_reports_content(
+            request.GET.get('round_to_hour', False),
+            request.GET['date'],
+            request.GET['date_from'],
+        ),
         'date': request.GET['date'],
         'date_from': request.GET['date_from'],
         'report_id': request.GET['report_id'],

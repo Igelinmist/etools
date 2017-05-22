@@ -48,7 +48,7 @@ class Report(models.Model):
             'columns': columns,
         }
 
-    def prepare_report_data(self, report_date=None, report_date_from=None):
+    def prepare_report_data(self, round_to_hour, report_date=None, report_date_from=None):
         """
         Метод заполняет данными таблицу для отчета
         """
@@ -60,6 +60,7 @@ class Report(models.Model):
             report_table.append([journals[indxr][0].equipment.name] + [journals[indxr][indxc].get_report_cell(
                 from_event=col.from_event,
                 summary_type=col.column_type,
+                round_to_hour=round_to_hour,
                 date_to=report_date,
                 date_from=report_date_from) if journals[indxr][indxc] else '-' for (indxc, col) in enumerate(columns)])
         return report_table
@@ -86,7 +87,7 @@ class Report(models.Model):
                 )
         return report_set
 
-    def prepare_reports_content(self, ru_date=None, ru_date_from=None):
+    def prepare_reports_content(self, round_to_hour=True, ru_date=None, ru_date_from=None):
         """
         Метод готовит одну или несколько таблиц отчетов,
         в зависимости от того, является ли исходный отчет
@@ -111,6 +112,7 @@ class Report(models.Model):
                 try:
                     temp_report = eq.report
                     temp_report_table = temp_report.prepare_report_data(
+                        round_to_hour=round_to_hour,
                         report_date=qdate,
                         report_date_from=qdate_from,
                     )
@@ -121,6 +123,7 @@ class Report(models.Model):
             report_list.append(
                 (self,
                  self.prepare_report_data(
+                    round_to_hour=round_to_hour,
                     report_date=qdate,
                     report_date_from=qdate_from,
                     ))

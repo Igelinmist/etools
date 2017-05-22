@@ -18,6 +18,11 @@ class ChooseReportForm(forms.Form):
         label=', на дату:',
     )
 
+    round_to_hour = forms.BooleanField(
+        label='округлять часы',
+        initial=True,
+    )
+
     def __init__(self, choices=None, *args, **kwargs):
         super(ChooseReportForm, self).__init__(*args, **kwargs)
         if choices:
